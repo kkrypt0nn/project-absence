@@ -1,0 +1,19 @@
+---
+title: Arguments
+description: There are command line argument (`project-absence --help`) that can be passed directly when staring the tool, and won't be taken from the config file.
+---
+
+There are command line argument (`project-absence --help`) that can be passed directly when staring the tool, and won't be taken from the [config file](/docs/usage/config).
+
+Each argument has a long variant prefixed with `--` and a short variant prefixed with `-`. When an argument has **no** default value, it is **required**.
+
+| Argument          | Description                                                                                           | Default                  |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | ------------------------ |
+| `domain` / `d`    | The domain to run the tool on.                                                                        |                          |
+| `config` / `c`    | Path to the [configuration file](/docs/usage/config).                                                 | `~/.absence/config.toml` |
+| `output` / `o`    | The path of where the output will be saved to.                                                        | `~/.absence`             |
+| `clipboard` / `C` | Whether to copy the resulting JSON database to the clipboard.                                         | `false`                  |
+| `script` / `s`    | The file path of the Lua script to load.                                                              |                          |
+| `version` / `V`   | Display the version of the tool.                                                                      | `false`                  |
+| `debug` / `D`     | Whether to print the database at the end of execution in a tree format and some other debugging data. | `false`                  |
+| `verbose` / `v`   | Whether to print some verbose data.                                                                   | `false`                  |

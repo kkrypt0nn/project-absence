@@ -1,0 +1,25 @@
+---
+title: Config
+description: The config file is the file that is used to configure each module individually.
+---
+
+The config file is the file that is used to configure each module individually. Its **default path** is `~/.absence/config.toml` and has the following **default content**:
+
+```toml title="~/.absence/config.toml"
+[domain_takeover]
+enabled = true
+
+[subdomains]
+enabled_runners = ["dork", "crtsh"]
+
+[subdomains.dork]
+search_engine = "google"
+
+[subdomains.crtsh]
+ignore_expired = false
+recent_only = false
+```
+
+Every module can be `enabled` by setting its value to `true` or have at least one runner listed in `enabled_runners` (if the module has runners). Some modules and runners have settings that can be set specifically for them only; see the page of the modules to know what can be set.
+
+Any non-needed module can just be removed from the config file as well.

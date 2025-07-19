@@ -1,0 +1,61 @@
+:root {
+  --ifm-color-primary: #7287fd;
+  --ifm-color-secondary: #bebfc4;
+  --ifm-color-primary-dark: #4e68fc;
+  --ifm-color-primary-darker: #3c59fc;
+  --ifm-color-primary-darkest: #052bfb;
+  --ifm-color-primary-light: #96a6fe;
+  --ifm-color-primary-lighter: #a8b5fe;
+  --ifm-color-primary-lightest: #dfe3ff;
+  background-color: #e6e9ef;
+  --ifm-background-color: #e6e9ef;
+  --ifm-navbar-background-color: #dce0e8;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --ifm-modal-background-color: #e6e9ef;
+  --ifm-details-border-color: #989a9e8c;
+}
+
+[data-theme="dark"] {
+  --ifm-color-primary: #bebefe;
+  --ifm-color-secondary: #bebfc4;
+  --ifm-color-primary-dark: #9292fd;
+  --ifm-color-primary-darker: #7c7cfd;
+  --ifm-color-primary-darkest: #3b3bfc;
+  --ifm-color-primary-light: #eaeaff;
+  --ifm-color-primary-lighter: #ffffff;
+  --ifm-color-primary-lightest: #ffffff;
+  --ifm-navbar-background-color: #11111b;
+  background-color: #171721;
+  --ifm-background-color: #171721;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  --ifm-modal-background-color: #171721;
+  --ifm-details-border-color: #7c7c928c;
+}
+
+/* Fix announcement close button color */
+[class^="announcementBar_"] .close {
+  color: var(--ifm-font-color-base);
+  opacity: 1;
+}
+
+/* Fix cards having weird background color */
+.card {
+  background-color: transparent;
+}
+
+.header-github-link:hover {
+  opacity: 0.6;
+}
+
+.header-github-link:before {
+  mask-image: url(/svgs/github.svg);
+  background-color: var(--ifm-font-color-base);
+  content: "";
+  display: flex;
+  height: 24px;
+  width: 24px;
+}

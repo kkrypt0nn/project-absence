@@ -1,0 +1,37 @@
+---
+title: Basics
+description: Project Absence supports Lua files for scripting.
+---
+
+:::warning
+Currently scripting is in its **very early stage**, just at a PoC state, hence it shouldn't be used at the moment.
+
+More will be worked on scripting once the core modules have been worked on and the tool is on a more stable state.
+:::
+
+Project Absence supports Lua files for scripting. Each Lua script must have the following code, so that it can be loaded and later executed once one of the events is emitted.
+
+```lua
+ExampleModule = {}
+
+function ExampleModule:noise_level()
+    return "None"
+end
+
+function ExampleModule:description()
+    return "This example module/script will just print 'Hello from Lua!' when a 'Ready' event has been emitted."
+end
+
+function ExampleModule:subscribers()
+    return { "Ready" }
+end
+
+function ExampleModule:execute()
+    println("$[fg:blue]$[effect:bold]Hello from Lua!$[reset]")
+    return true
+end
+
+return ExampleModule
+```
+
+The methods **must** be set and have a return value as per the example above.
