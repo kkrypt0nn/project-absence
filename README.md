@@ -32,7 +32,7 @@ More features are in development.
 
 Project Absence has the following [Rust features](https://doc.rust-lang.org/cargo/reference/features.html) available:
 
-* `clipboard`: Will let you use the `--clipboard/-C` command line argument, only necessary if you want to copy the result to your clipboard (the result is saved in a file at `~/.absence/result.json` either way)
+* `clipboard`: Will let you use the `--clipboard/-C` command line argument, only necessary if you want to copy the result to your clipboard (the result is saved in a file at `~/.absence/result.{json,md}` either way)
 
 ### Installation
 
@@ -69,7 +69,7 @@ services:
 And then run it with
 
 ```bash
-docker-compose run project-absence
+docker compose run project-absence
 ```
 
 #### Build from source
@@ -109,19 +109,21 @@ Full documentation is available [here](https://absence.krypton.ninja/docs/). It 
 If you encounter issues while using Project Absence, consider the following:
 
 - Ensure you are running the latest version
-- Join my Discord server [here](https://discord.gg/xj6y5ZaTMr)
 - Report issues: Use the [GitHub issue tracker](https://github.com/kkrypt0nn/project-absence/issues)
 
 ## Disclaimer
 
-Use responsibly and lawfully. Project Absence is meant to help system administrators and security engineers find overlooked subdomains and possible takeover risks in their own infrastructure. Do not use it against systems you do not own or explicitly have permission to test.
+Use responsibly and lawfully. Project Absence is a tool designed to assist cybersecurity professionals, engineers, and system administrators in identifying publicly available information related to their digital infrastructure. Do not use it against systems you do not own or explicitly have permission to test.
 
 By using this tool, you agree to comply with all applicable laws and abide by the [Terms of Use](./TERMS_OF_USE.md).
 
 ## Contributing
 
-People may contribute by following the [Contributing Guidelines](./CONTRIBUTING.md) and the [Code of Conduct](./CODE_OF_CONDUCT.md)
+> [!NOTE]
+> Contributions are more than welcome after the `v1.0.0` release which can be tracked [here](https://github.com/kkrypt0nn/project-absence/milestone/1).
+
+People may contribute by following the [Contributing Guidelines](https://github.com/kkrypt0nn/project-absence/blob/main/CONTRIBUTING.md) and the [Code of Conduct](https://github.com/kkrypt0nn/project-absence/blob/main/CODE_OF_CONDUCT.md)
 
 ## License
 
-This project was made with 💜 by [Krypton](https://github.com/kkrypt0nn) and is under the [MIT License](./LICENSE.md).
+This project was made with 💜 by [Krypton](https://github.com/kkrypt0nn) and is under the [MIT License](https://github.com/kkrypt0nn/project-absence/blob/main/LICENSE.md).

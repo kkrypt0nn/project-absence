@@ -12,8 +12,8 @@ Full documentation is available [here](https://absence.krypton.ninja/docs/). It 
 
 ## Contributing
 
-People may contribute by following the [Contributing Guidelines](../CONTRIBUTING.md) and the [Code of Conduct](../CODE_OF_CONDUCT.md).
+People may contribute by following the [Contributing Guidelines](https://github.com/kkrypt0nn/project-absence/blob/main/CONTRIBUTING.md) and the [Code of Conduct](https://github.com/kkrypt0nn/project-absence/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
 
-This project was made with 💜 by [Krypton](https://github.com/kkrypt0nn) and is under the [MIT License](../LICENSE.md).
+This project was made with 💜 by [Krypton](https://github.com/kkrypt0nn) and is under the [MIT License](https://github.com/kkrypt0nn/project-absence/blob/main/LICENSE.md).
