@@ -2,11 +2,7 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    events,
-    modules::{Context, Module},
-    session::Session,
-};
+use crate::{event_bus::Event, modules::Module, session::Session};
 
 pub mod crtsh;
 pub mod dork;
@@ -50,16 +46,16 @@ impl Module for SubdomainDiscoveryModule {
         String::from("Composite module to run multiple subdomain discovery runners")
     }
 
-    fn subscribers(&self) -> Vec<events::Type> {
+    fn subscribers(&self) -> Vec<String> {
         self.runners
             .iter()
             .flat_map(|runner| runner.subscribers())
             .collect()
     }
 
-    fn execute(&self, session: &Session, context: Context) -> Result<(), String> {
+    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
         for runner in &self.runners {
-            runner.execute(session, context.clone())?;
+            runner.execute(session, event)?;
         }
         Ok(())
     }

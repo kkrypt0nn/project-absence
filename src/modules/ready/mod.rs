@@ -1,6 +1,6 @@
-use crate::events;
+use crate::event_bus::Event;
 use crate::logger;
-use crate::modules::{Context, Module};
+use crate::modules::Module;
 use crate::session::Session;
 
 pub struct ModuleReady {}
@@ -22,11 +22,11 @@ impl Module for ModuleReady {
         )
     }
 
-    fn subscribers(&self) -> Vec<events::Type> {
-        vec![events::Type::Ready]
+    fn subscribers(&self) -> Vec<String> {
+        vec![String::from("ready")]
     }
 
-    fn execute(&self, _: &Session, _: Context) -> Result<(), String> {
+    fn execute(&self, _: &Session, _: &Event) -> Result<(), String> {
         logger::println(
             self.name(),
             "Project Absence is now ready and will start doing its magic!",

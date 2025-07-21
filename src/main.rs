@@ -1,7 +1,6 @@
 use std::{
     env::consts::{ARCH, OS},
     process,
-    sync::mpsc,
 };
 
 use clap::Parser;
@@ -11,7 +10,7 @@ mod args;
 mod config;
 mod database;
 mod debug;
-mod events;
+mod event_bus;
 mod flags;
 mod helpers;
 mod logger;
@@ -40,8 +39,7 @@ fn main() {
         }
     };
 
-    let (tx, rx) = mpsc::sync_channel::<events::Type>(100);
-    let session = session::Session::new(args, config, tx, rx);
+    let session = session::Session::new(args, config);
     session.register_config_modules();
 
     if let Err(err) = session.run() {
