@@ -7,9 +7,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::database::node::{Node, Type};
-use crate::modules::{Context, Module};
+use crate::event_bus::Event;
+use crate::modules::Module;
 use crate::session::Session;
-use crate::{config, events, helpers, logger};
+use crate::{config, helpers, logger};
 
 #[derive(
     Copy, Clone, Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord, Serialize, Hash,
@@ -147,15 +148,15 @@ impl Module for Runner {
         )
     }
 
-    fn subscribers(&self) -> Vec<events::Type> {
-        vec![events::Type::DiscoveredDomain(String::new())]
+    fn subscribers(&self) -> Vec<String> {
+        vec![String::from("discovered:domain")]
     }
 
-    fn execute(&self, session: &Session, context: Context) -> Result<(), String> {
-        let domain = match context {
-            Context::Domain(domain) => domain,
+    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+        let domain = match event {
+            Event::DiscoveredDomain(domain) => domain,
             _ => {
-                return Err("Received wrong context, exiting module".to_string());
+                return Err("Received wrong event, exiting module".to_string());
             }
         };
         let search_engine = self.config.search_engine.unwrap_or_default();
@@ -188,7 +189,7 @@ impl Module for Runner {
                             parent.connect(new_node);
                         }
                         session.get_state().discover_domain(subdomain.to_string());
-                        session.emit(events::Type::DiscoveredDomain(subdomain.to_string()));
+                        session.publish(Event::DiscoveredDomain(subdomain.to_string()));
                     }
                 }
             }

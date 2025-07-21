@@ -3,9 +3,10 @@ use std::collections::HashMap;
 use reqwest::header::USER_AGENT;
 
 use crate::database::node::Type;
-use crate::modules::{Context, Module};
+use crate::event_bus::Event;
+use crate::modules::Module;
 use crate::session::Session;
-use crate::{events, flags, helpers, logger};
+use crate::{flags, helpers, logger};
 
 pub struct ModuleDomainTakeover {
     platforms: HashMap<String, String>,
@@ -62,15 +63,15 @@ impl Module for ModuleDomainTakeover {
         )
     }
 
-    fn subscribers(&self) -> Vec<events::Type> {
-        vec![events::Type::DiscoveredDomain(String::new())]
+    fn subscribers(&self) -> Vec<String> {
+        vec![String::from("discovered:domain")]
     }
 
-    fn execute(&self, session: &Session, context: Context) -> Result<(), String> {
-        let domain = match context {
-            Context::Domain(domain) => domain,
+    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+        let domain = match event {
+            Event::DiscoveredDomain(domain) => domain,
             _ => {
-                return Err("Received wrong context, exiting module".to_string());
+                return Err("Received wrong event, exiting module".to_string());
             }
         };
 

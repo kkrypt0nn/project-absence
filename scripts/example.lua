@@ -9,7 +9,7 @@ function ExampleModule:description()
 end
 
 function ExampleModule:subscribers()
-    return { "Ready" }
+    return { "ready" }
 end
 
 function ExampleModule:execute()

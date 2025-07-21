@@ -1,4 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::sync::Mutex;
@@ -6,9 +7,10 @@ use std::sync::Mutex;
 use reqwest::header::USER_AGENT;
 
 use crate::database::node::{Node, Type};
-use crate::modules::{Context, Module};
+use crate::event_bus::Event;
+use crate::modules::Module;
 use crate::session::Session;
-use crate::{config, events, flags, helpers, logger};
+use crate::{config, flags, helpers, logger};
 
 pub struct Runner {
     config: config::SubdomainsCrtShConfig,
@@ -41,15 +43,15 @@ impl Module for Runner {
         String::from("This module will perform a passive discovery of new domains by using crt.sh")
     }
 
-    fn subscribers(&self) -> Vec<events::Type> {
-        vec![events::Type::DiscoveredDomain(String::new())]
+    fn subscribers(&self) -> Vec<String> {
+        vec![String::from("discovered:domain")]
     }
 
-    fn execute(&self, session: &Session, context: Context) -> Result<(), String> {
-        let domain = match context {
-            Context::Domain(domain) => domain,
+    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+        let domain = match event {
+            Event::DiscoveredDomain(domain) => domain,
             _ => {
-                return Err("Received wrong context, exiting module".to_string());
+                return Err("Received wrong event, exiting module".to_string());
             }
         };
 
@@ -67,6 +69,10 @@ impl Module for Runner {
             .send();
         match response {
             Ok(response) => {
+                let status = response.status();
+                if status != StatusCode::OK {
+                    return Err(format!("crt.sh returned status code {}", status));
+                }
                 let items: Vec<CrtShItem> = response.json().unwrap_or_default();
                 for item in items {
                     let name_values = &item
@@ -139,14 +145,16 @@ impl Module for Runner {
                                 parent.connect(new_node);
                             }
                             session.get_state().discover_domain(name_value.to_string());
-                            session.emit(events::Type::DiscoveredDomain(name_value.clone()));
+                            session.publish(Event::DiscoveredDomain(name_value.clone()));
                         }
                     }
                 }
 
                 Ok(())
             }
-            Err(_) => Err("Failed performing a request to crt.sh (Is it down?)".to_string()),
+            Err(_) => Err(
+                "Failed performing a request to crt.sh, likely a timeout; is it down?".to_string(),
+            ),
         }
     }
 }

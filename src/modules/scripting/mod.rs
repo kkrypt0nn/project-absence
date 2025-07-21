@@ -2,9 +2,10 @@ use std::fs;
 
 use mlua::Function;
 
-use crate::modules::{Context, Module};
+use crate::event_bus::Event;
+use crate::logger;
+use crate::modules::Module;
 use crate::session::Session;
-use crate::{events, logger};
 
 pub struct Scripting {
     lua: mlua::Lua,
@@ -55,27 +56,15 @@ impl Module for Scripting {
             ))
     }
 
-    fn subscribers(&self) -> Vec<events::Type> {
-        if let Ok(subs) = self
-            .module
+    fn subscribers(&self) -> Vec<String> {
+        self.module
             .get::<Function>("subscribers")
             .unwrap()
             .call::<Vec<String>>("")
-        {
-            subs.into_iter()
-                .filter_map(|s| match s.as_str() {
-                    "Ready" => Some(events::Type::Ready),
-                    "DiscoveredDomain" => Some(events::Type::DiscoveredDomain(String::new())),
-                    "OpenPort" => Some(events::Type::OpenPort(String::new(), 0)),
-                    _ => None,
-                })
-                .collect()
-        } else {
-            vec![]
-        }
+            .unwrap_or_default()
     }
 
-    fn execute(&self, _: &Session, _: Context) -> Result<(), String> {
+    fn execute(&self, _: &Session, _: &Event) -> Result<(), String> {
         if let Ok(execute_fn) = self.module.get::<mlua::Function>("execute") {
             // The session methods should be made globally availble. Likely as a table
             // The context args should be passed as a of string, convert everthing
