@@ -1,10 +1,63 @@
 # Project specific auto-labeler
 
+area/meta:
+  - changed-files:
+      - any-glob-to-any-file:
+          - CODE_OF_CONDUCT.md
+          - CONTRIBUTING.md
+          - LICENSE.md
+          - TERMS_OF_USE.md
+
 area/docs:
   - changed-files:
       - any-glob-to-any-file:
           - README.md
+
 area/github:
   - changed-files:
       - any-glob-to-any-file:
           - .github/**/*
+
+area/docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - Dockerfile
+          - docker-compose.yml
+
+area/dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - Cargo.lock
+          - Cargo.toml
+          - website/package.json
+          - website/package-lock.json
+
+area/scripts:
+  - changed-files:
+      - any-glob-to-any-file:
+          - scripts/**/*
+
+area/website:
+  - changed-files:
+      - any-glob-to-any-file:
+          - website/**/*
+
+area/modules:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/**/*
+
+module/discovery:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/discovery/**/*
+
+module/domain-takeover:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/domain_takeover/**/*
+
+module/scripting:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/scripting/**/*
