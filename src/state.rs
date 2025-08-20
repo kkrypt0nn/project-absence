@@ -20,6 +20,7 @@ pub struct State {
     debug: bool,
 
     discovered_domains: Mutex<Vec<String>>,
+    discovered_endpoints: Mutex<Vec<String>>,
     discovered_emails: Mutex<Vec<String>>,
 }
 
@@ -32,6 +33,7 @@ impl State {
             debug,
 
             discovered_domains: Mutex::new(Vec::new()),
+            discovered_endpoints: Mutex::new(Vec::new()),
             discovered_emails: Mutex::new(Vec::new()),
         }
     }
@@ -98,6 +100,17 @@ impl State {
 
     pub fn has_discovered_domain(&self, domain: String) -> bool {
         self.discovered_domains.lock().unwrap().contains(&domain)
+    }
+
+    pub fn discover_endpoint(&self, endpoint: String) {
+        self.discovered_endpoints.lock().unwrap().push(endpoint)
+    }
+
+    pub fn has_discovered_endpoint(&self, endpoint: String) -> bool {
+        self.discovered_endpoints
+            .lock()
+            .unwrap()
+            .contains(&endpoint)
     }
 
     pub fn discover_email(&self, email: String) {

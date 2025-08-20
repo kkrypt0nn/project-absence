@@ -8,6 +8,8 @@ use crate::flags;
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
     Domain,
+    // Maybe this one will be renamed to WaybackMachineEndpoint or add a flag?
+    Endpoint,
     Email,
 }
 
@@ -16,6 +18,9 @@ impl fmt::Display for Type {
         match self {
             Type::Domain => {
                 write!(formatter, "domain")
+            }
+            Type::Endpoint => {
+                write!(formatter, "endpoint")
             }
             Type::Email => {
                 write!(formatter, "email")
@@ -180,13 +185,31 @@ impl Node {
         let connections_markdown = self
             .get_connections()
             .iter()
+            .filter(|conn| !matches!(conn.r#type, Type::Endpoint))
             .map(|conn| conn.to_markdown())
             .collect::<Vec<String>>()
             .join("\n\n");
 
+        let endpoint_connections = self
+            .get_connections()
+            .iter()
+            .filter(|conn| matches!(conn.r#type, Type::Endpoint))
+            // Later this may change, for now the endpoints only come from the Wayback Machine
+            .map(|conn| {
+                format!(
+                    "- [`{0}`](https://web.archive.org/web/20250000000000*/{0})",
+                    conn.value
+                )
+            })
+            .collect::<Vec<String>>()
+            .join("\n");
+
         let mut sections = vec![format!("### {}", self.value)];
         if let Some(flags) = flags {
             sections.push(flags);
+        }
+        if !endpoint_connections.is_empty() {
+            sections.push(format!("#### Endpoints\n{}", endpoint_connections));
         }
         if !connections_markdown.is_empty() {
             sections.push(connections_markdown);

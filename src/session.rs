@@ -14,11 +14,9 @@ use crate::modules::Module;
 use crate::{args, config, database, debug, logger, modules, state};
 
 macro_rules! add_runner {
-    ($enabled_runners:expr, $runners_vec:expr, $name:expr, $cfg_opt:expr, $constructor:path) => {
+    ($enabled_runners:expr, $runners_vec:expr, $name:expr, $cfg:expr, $constructor:path) => {
         if $enabled_runners.iter().any(|r| r.to_string() == $name) {
-            if let Some(cfg) = $cfg_opt {
-                $runners_vec.push(Box::new($constructor(cfg.clone())));
-            }
+            $runners_vec.push(Box::new($constructor($cfg.clone().unwrap_or_default())));
         }
     };
 }
@@ -191,6 +189,25 @@ impl Session {
             let lua_module =
                 modules::scripting::Scripting::new(script).expect("Failed to load Lua module");
             self.register_module(lua_module);
+        }
+
+        if let Some(endpoints_cfg) = &self.config.endpoints {
+            let enabled_runners = endpoints_cfg.enabled_runners.as_deref().unwrap_or(&[]);
+            let mut runners: Vec<Box<dyn Module>> = Vec::new();
+
+            add_runner!(
+                enabled_runners,
+                runners,
+                "wayback_machine",
+                &endpoints_cfg.wayback_machine,
+                modules::discovery::endpoints::wayback_machine::Runner::new
+            );
+
+            if !runners.is_empty() {
+                self.register_module(modules::discovery::endpoints::EndpointDiscoveryModule::new(
+                    runners,
+                ));
+            }
         }
 
         if let Some(domain_takeover_cfg) = &self.config.domain_takeover {

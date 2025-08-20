@@ -4,11 +4,20 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     logger,
-    modules::discovery::subdomains::{self, dork},
+    modules::discovery::{
+        endpoints,
+        subdomains::{self, dork},
+    },
 };
 
 const DEFAULT_CONFIG: &str = r#"[domain_takeover]
 enabled = true
+
+[endpoints]
+enabled_runners = ["wayback_machine"]
+
+[endpoints.wayback_machine]
+timeout = 30
 
 [subdomains]
 enabled_runners = ["dork", "crtsh"]
@@ -48,6 +57,7 @@ pub fn create_file_if_not_existing() {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub domain_takeover: Option<DomainTakeoverConfig>,
+    pub endpoints: Option<EndpointsConfig>,
     pub subdomains: Option<SubdomainsConfig>,
 }
 
@@ -58,8 +68,22 @@ pub struct DomainTakeoverConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct EndpointsConfig {
+    /// List of enabled runners
+    pub enabled_runners: Option<Vec<endpoints::Runners>>,
+    // Configuration for the Wayback Machine runner
+    pub wayback_machine: Option<EndpointsWaybackMachineConfig>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct EndpointsWaybackMachineConfig {
+    /// The timeout, in seconds, to use when requesting the endpoint, default is 30
+    pub timeout: Option<u64>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SubdomainsConfig {
-    /// List of enabled runners like "dork", "crtsh", etc.
+    /// List of enabled runners
     pub enabled_runners: Option<Vec<subdomains::Runners>>,
     // Configuration for the dork runner
     pub dork: Option<SubdomainsDorkConfig>,
@@ -67,14 +91,14 @@ pub struct SubdomainsConfig {
     pub crtsh: Option<SubdomainsCrtShConfig>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SubdomainsDorkConfig {
     /// The search engine to use
     /// TODO: Allow multiple, default is all
     pub search_engine: Option<dork::SearchEngine>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SubdomainsCrtShConfig {
     /// Ignore expired certificates
     pub ignore_expired: Option<bool>,

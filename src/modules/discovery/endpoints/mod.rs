@@ -4,46 +4,41 @@ use serde::{Deserialize, Serialize};
 
 use crate::{event_bus::Event, modules::Module, session::Session};
 
-pub mod crtsh;
-pub mod dork;
+pub mod wayback_machine;
 
 #[derive(Copy, Clone, Debug, Deserialize, PartialEq, Eq, PartialOrd, Ord, Serialize, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum Runners {
-    Crtsh,
-    Dork,
+    WaybackMachine,
 }
 
 impl fmt::Display for Runners {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Runners::Crtsh => {
-                write!(formatter, "crtsh")
-            }
-            Runners::Dork => {
-                write!(formatter, "dork")
+            Runners::WaybackMachine => {
+                write!(formatter, "wayback_machine")
             }
         }
     }
 }
 
-pub struct SubdomainDiscoveryModule {
+pub struct EndpointDiscoveryModule {
     runners: Vec<Box<dyn Module>>,
 }
 
-impl SubdomainDiscoveryModule {
+impl EndpointDiscoveryModule {
     pub fn new(runners: Vec<Box<dyn Module>>) -> Self {
         Self { runners }
     }
 }
 
-impl Module for SubdomainDiscoveryModule {
+impl Module for EndpointDiscoveryModule {
     fn name(&self) -> String {
-        String::from("discovery:subdomains")
+        String::from("discovery:endpoint")
     }
 
     fn description(&self) -> String {
-        String::from("Composite module to run multiple subdomain discovery runners")
+        String::from("Composite module to run multiple endpoint discovery runners")
     }
 
     fn subscribers(&self) -> Vec<String> {
