@@ -26,7 +26,10 @@ const sidebars = {
         {
           type: "category",
           label: "Discovery",
-          items: ["modules/discovery/subdomains"],
+          items: [
+            "modules/discovery/endpoints",
+            "modules/discovery/subdomains",
+          ],
         },
         "modules/domain_takeover",
       ],
