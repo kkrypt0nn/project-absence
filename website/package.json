@@ -25,7 +25,7 @@
     "@fortawesome/free-solid-svg-icons": "7.0.1",
     "@fortawesome/react-fontawesome": "3.0.2",
     "@mdx-js/react": "3.1.1",
-    "@xyflow/react": "12.8.5",
+    "@xyflow/react": "12.8.6",
     "clsx": "2.1.1",
     "dagre": "0.8.5",
     "prettier": "3.6.2",
