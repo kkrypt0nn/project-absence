@@ -21,7 +21,7 @@ clipboard = ["dep:clipboard"]
 [dependencies]
 base64 = "=0.22.1"
 chrono = "=0.4.42"
-clap = { version = "=4.5.48", features = ["derive"] }
+clap = { version = "=4.5.49", features = ["derive"] }
 clipboard = { version = "=0.5.0", optional = true }
 human_bytes = "=0.4.3"
 memory-stats = "=1.2.0"
