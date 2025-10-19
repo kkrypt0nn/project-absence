@@ -4,14 +4,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     logger,
-    modules::discovery::{
-        endpoints,
-        subdomains::{self, dork},
-    },
+    modules::discovery::{emails, endpoints, subdomains},
 };
 
 const DEFAULT_CONFIG: &str = r#"[domain_takeover]
 enabled = true
+
+[emails]
+enabled_runners = ["dork"]
+
+[emails.dork]
+search_engine = "ecosia"
 
 [endpoints]
 enabled_runners = ["wayback_machine"]
@@ -23,7 +26,7 @@ timeout = 30
 enabled_runners = ["dork", "crtsh"]
 
 [subdomains.dork]
-search_engine = "google"
+search_engine = "ecosia"
 
 [subdomains.crtsh]
 ignore_expired = false
@@ -58,6 +61,7 @@ pub fn create_file_if_not_existing() {
 pub struct Config {
     pub domain_takeover: Option<DomainTakeoverConfig>,
     pub endpoints: Option<EndpointsConfig>,
+    pub emails: Option<EmailsConfig>,
     pub subdomains: Option<SubdomainsConfig>,
 }
 
@@ -65,6 +69,20 @@ pub struct Config {
 pub struct DomainTakeoverConfig {
     /// Whether the module is enabled
     pub enabled: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct EmailsConfig {
+    /// List of enabled runners
+    pub enabled_runners: Option<Vec<emails::Runners>>,
+    // Configuration for the dork runner
+    pub dork: Option<EmailsDorkConfig>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct EmailsDorkConfig {
+    /// The search engine to use
+    pub search_engine: Option<emails::dork::SearchEngine>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -94,8 +112,7 @@ pub struct SubdomainsConfig {
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SubdomainsDorkConfig {
     /// The search engine to use
-    /// TODO: Allow multiple, default is all
-    pub search_engine: Option<dork::SearchEngine>,
+    pub search_engine: Option<subdomains::dork::SearchEngine>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
