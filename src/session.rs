@@ -215,6 +215,24 @@ impl Session {
                 self.register_module(modules::domain_takeover::ModuleDomainTakeover::new());
             }
         }
+        if let Some(emails_cfg) = &self.config.emails {
+            let enabled_runners = emails_cfg.enabled_runners.as_deref().unwrap_or(&[]);
+            let mut runners: Vec<Box<dyn Module>> = Vec::new();
+
+            add_runner!(
+                enabled_runners,
+                runners,
+                "dork",
+                &emails_cfg.dork,
+                modules::discovery::emails::dork::Runner::new
+            );
+
+            if !runners.is_empty() {
+                self.register_module(modules::discovery::emails::EmailDiscoveryModule::new(
+                    runners,
+                ));
+            }
+        }
         if let Some(subdomains_cfg) = &self.config.subdomains {
             let enabled_runners = subdomains_cfg.enabled_runners.as_deref().unwrap_or(&[]);
             let mut runners: Vec<Box<dyn Module>> = Vec::new();

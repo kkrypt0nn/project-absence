@@ -27,6 +27,7 @@ const sidebars = {
           type: "category",
           label: "Discovery",
           items: [
+            "modules/discovery/emails",
             "modules/discovery/endpoints",
             "modules/discovery/subdomains",
           ],
