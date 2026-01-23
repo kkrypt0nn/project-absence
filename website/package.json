@@ -28,7 +28,7 @@
     "@xyflow/react": "12.10.0",
     "clsx": "2.1.1",
     "dagre": "0.8.5",
-    "prettier": "3.8.0",
+    "prettier": "3.8.1",
     "prism-react-renderer": "2.4.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
