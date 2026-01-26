@@ -1,4 +1,4 @@
-name: Project Absence CD (Deploy Website)
+name: Deploy Website
 
 on:
   workflow_dispatch:

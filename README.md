@@ -5,7 +5,7 @@
 [![Discord Server Badge](https://img.shields.io/discord/1358456011316396295?logo=discord)](https://discord.gg/xj6y5ZaTMr)
 [![Crates.io Badge](https://img.shields.io/crates/v/project-absence.svg?color=fe7d37)](https://crates.io/crates/project-absence)
 [![Docker Badge](https://img.shields.io/docker/v/kkrypt0nn/project-absence?logo=docker)](https://hub.docker.com/r/kkrypt0nn/project-absence)
-[![CI Badge](https://github.com/kkrypt0nn/project-absence/actions/workflows/ci.yml/badge.svg)](https://github.com/kkrypt0nn/project-absence/actions)
+[![CI Badge](https://github.com/kkrypt0nn/project-absence/actions/workflows/ci.yaml/badge.svg)](https://github.com/kkrypt0nn/project-absence/actions)
 [![Dependency Status Badge](https://deps.rs/repo/github/kkrypt0nn/project-absence/status.svg)](https://deps.rs/repo/github/kkrypt0nn/project-absence)
 
 [![Last Commit Badge](https://img.shields.io/github/last-commit/kkrypt0nn/project-absence)](https://github.com/kkrypt0nn/project-absence/commits/main)
@@ -52,24 +52,6 @@ You can run the tool from the published [Docker image](https://hub.docker.com/r/
 
 ```bash
 docker run -v ~/.absence:/root/.absence -it kkrypt0nn/project-absence
-```
-
-#### Docker compose
-
-You can run the tool from a `docker-compose.yml` file, for example:
-
-```yml
-services:
-  project-absence:
-    image: kkrypt0nn/project-absence:latest
-    volumes:
-      - ${HOME}/.absence:/root/.absence
-```
-
-And then run it with
-
-```bash
-docker compose run project-absence
 ```
 
 #### Build from source

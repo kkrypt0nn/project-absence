@@ -10,7 +10,7 @@
   description: "Changes to meta files like LICENSE, CONTRIBUTING, TERMS_OF_USE, and CODE_OF_CONDUCT"
 - name: "area/docker"
   color: "#C2E0C6"
-  description: "Changes to Dockerfile or docker-compose.yml"
+  description: "Changes to Dockerfile"
 - name: "area/dependencies"
   color: "#BFD4DB"
   description: "Changes to the dependencies"

@@ -1,4 +1,4 @@
-name: Project Absence CD (Publish Crate)
+name: Publish crate
 
 on:
   push:
