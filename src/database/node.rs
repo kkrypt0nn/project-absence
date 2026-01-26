@@ -182,6 +182,26 @@ impl Node {
             None
         };
 
+        let mut data_markdown = String::new();
+        for (key, value) in &self.data {
+            if key == "flags" {
+                continue;
+            }
+            data_markdown.push_str(&format!(
+                "#### {}\n{}\n\n",
+                key,
+                match value {
+                    Value::Object(_) | Value::Array(_) => {
+                        format!(
+                            "```json\n{}\n```",
+                            serde_json::to_string_pretty(value).unwrap_or_default()
+                        )
+                    }
+                    _ => value.to_string(),
+                }
+            ));
+        }
+
         let connections_markdown = self
             .get_connections()
             .iter()
@@ -207,6 +227,9 @@ impl Node {
         let mut sections = vec![format!("### {}", self.value)];
         if let Some(flags) = flags {
             sections.push(flags);
+        }
+        if !data_markdown.is_empty() {
+            sections.push(data_markdown.trim().to_string());
         }
         if !endpoint_connections.is_empty() {
             sections.push(format!("#### Endpoints\n{}", endpoint_connections));

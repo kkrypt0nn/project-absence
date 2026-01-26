@@ -2,6 +2,7 @@ use crate::{event_bus::Event, session::Session};
 
 pub mod discovery;
 pub mod domain_takeover;
+pub mod infrastructure;
 pub mod ready;
 pub mod scripting;
 

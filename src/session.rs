@@ -7,7 +7,7 @@ use std::{env, thread};
 #[cfg(feature = "clipboard")]
 use clipboard::{ClipboardContext, ClipboardProvider};
 
-use reqwest::blocking::Client;
+use reqwest::blocking::{Client, ClientBuilder};
 
 use crate::event_bus::{self, EventBus};
 use crate::modules::Module;
@@ -44,7 +44,10 @@ impl Session {
                 database::node::Node::new(database::node::Type::Domain, domain_clone),
             ))),
             state: Arc::new(state::State::new(is_verbose, is_debug)),
-            http_client: Client::new(),
+            http_client: ClientBuilder::new()
+                .tls_info(true)
+                .build()
+                .expect("Client::new()"),
             shutdown: Arc::new((Mutex::new(false), Condvar::new())),
         })
     }
@@ -215,6 +218,7 @@ impl Session {
                 self.register_module(modules::domain_takeover::ModuleDomainTakeover::new());
             }
         }
+
         if let Some(emails_cfg) = &self.config.emails {
             let enabled_runners = emails_cfg.enabled_runners.as_deref().unwrap_or(&[]);
             let mut runners: Vec<Box<dyn Module>> = Vec::new();
@@ -233,6 +237,7 @@ impl Session {
                 ));
             }
         }
+
         if let Some(subdomains_cfg) = &self.config.subdomains {
             let enabled_runners = subdomains_cfg.enabled_runners.as_deref().unwrap_or(&[]);
             let mut runners: Vec<Box<dyn Module>> = Vec::new();
@@ -256,6 +261,12 @@ impl Session {
                 self.register_module(
                     modules::discovery::subdomains::SubdomainDiscoveryModule::new(runners),
                 );
+            }
+        }
+
+        if let Some(infrastructure_cfg) = &self.config.infrastructure {
+            if infrastructure_cfg.enabled {
+                self.register_module(modules::infrastructure::ModuleInfrastructure::new());
             }
         }
     }
