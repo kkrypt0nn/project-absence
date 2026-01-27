@@ -33,6 +33,7 @@ const sidebars = {
           ],
         },
         "modules/domain_takeover",
+        "modules/infrastructure",
       ],
       collapsed: true,
     },

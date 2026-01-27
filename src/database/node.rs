@@ -188,7 +188,7 @@ impl Node {
                 continue;
             }
             data_markdown.push_str(&format!(
-                "#### {}\n{}\n\n",
+                "#### {}\n\n{}\n\n",
                 key,
                 match value {
                     Value::Object(_) | Value::Array(_) => {
