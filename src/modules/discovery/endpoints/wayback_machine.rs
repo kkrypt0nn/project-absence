@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::sync::Mutex;
 use std::time::Duration;
 use std::vec;
 
@@ -14,23 +13,11 @@ use crate::{config, helpers, logger};
 
 pub struct Runner {
     config: config::EndpointsWaybackMachineConfig,
-    processed_endpoints: Mutex<Vec<String>>,
 }
 
 impl Runner {
     pub fn new(config: config::EndpointsWaybackMachineConfig) -> Self {
-        Runner {
-            config,
-            processed_endpoints: Mutex::new(Vec::new()),
-        }
-    }
-
-    pub fn process(&self, domain: String) {
-        self.processed_endpoints.lock().unwrap().push(domain)
-    }
-
-    pub fn has_processed(&self, domain: String) -> bool {
-        self.processed_endpoints.lock().unwrap().contains(&domain)
+        Runner { config }
     }
 }
 
@@ -50,15 +37,8 @@ impl Module for Runner {
     fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
         let domain = match event {
             Event::DiscoveredDomain(domain) => domain,
-            _ => {
-                return Err("Received wrong event, exiting module".to_string());
-            }
+            _ => return Err("Received wrong event, exiting module".to_string()),
         };
-
-        if self.has_processed(domain.to_string()) {
-            return Ok(());
-        }
-        self.process(domain.to_string());
 
         let timeout_seconds = self.config.timeout.unwrap_or(30);
 

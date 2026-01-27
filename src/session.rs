@@ -4,9 +4,6 @@ use std::path::PathBuf;
 use std::sync::{Arc, Condvar, Mutex, MutexGuard};
 use std::{env, thread};
 
-#[cfg(feature = "clipboard")]
-use clipboard::{ClipboardContext, ClipboardProvider};
-
 use reqwest::blocking::{Client, ClientBuilder};
 
 use crate::event_bus::{self, EventBus};
@@ -56,7 +53,7 @@ impl Session {
         &self.args
     }
 
-    pub fn get_database(&self) -> MutexGuard<database::Database> {
+    pub fn get_database(&self) -> MutexGuard<'_, database::Database> {
         self.database.lock().unwrap()
     }
 
@@ -75,9 +72,11 @@ impl Session {
     fn output_results(&self) -> Result<(), Error> {
         #[cfg(feature = "clipboard")]
         if self.get_args().clipboard {
-            let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-            if ctx
-                .set_contents(self.get_database().get_as_pretty_json())
+            use arboard::Clipboard;
+
+            let mut clipboard = Clipboard::new().unwrap();
+            if clipboard
+                .set_text(self.get_database().get_as_pretty_json())
                 .is_ok()
             {
                 logger::info(
@@ -168,6 +167,17 @@ impl Session {
                 let permit = session.get_state().get_semaphore_permit();
                 let event_clone = e.clone();
 
+                if session.get_state().is_debug_or_verbose() {
+                    logger::trace(
+                        "bus:run",
+                        format!(
+                            "Running module {} as the event {:?} has been emitted",
+                            module_clone.name(),
+                            e,
+                        ),
+                    );
+                }
+
                 thread::spawn(move || {
                     if let Err(e) = module_clone.execute(&session, &event_clone) {
                         logger::error(module_clone.name(), e);
@@ -185,6 +195,7 @@ impl Session {
     // TODO: Include in the cleanup a way to not have to add the runners manually? Maybe some register_runner macro for the module?
     pub fn register_config_modules(self: &Arc<Self>) {
         self.register_module(modules::ready::ModuleReady::new());
+        self.register_module(modules::request::ModuleRequest::new());
 
         // Load Lua module
         // TODO: Allow multiple Lua modules in the future. For the current PoC, one is fine.
@@ -213,10 +224,10 @@ impl Session {
             }
         }
 
-        if let Some(domain_takeover_cfg) = &self.config.domain_takeover {
-            if domain_takeover_cfg.enabled {
-                self.register_module(modules::domain_takeover::ModuleDomainTakeover::new());
-            }
+        if let Some(domain_takeover_cfg) = &self.config.domain_takeover
+            && domain_takeover_cfg.enabled
+        {
+            self.register_module(modules::domain_takeover::ModuleDomainTakeover::new());
         }
 
         if let Some(emails_cfg) = &self.config.emails {
@@ -264,10 +275,10 @@ impl Session {
             }
         }
 
-        if let Some(infrastructure_cfg) = &self.config.infrastructure {
-            if infrastructure_cfg.enabled {
-                self.register_module(modules::infrastructure::ModuleInfrastructure::new());
-            }
+        if let Some(infrastructure_cfg) = &self.config.infrastructure
+            && infrastructure_cfg.enabled
+        {
+            self.register_module(modules::infrastructure::ModuleInfrastructure::new());
         }
     }
 

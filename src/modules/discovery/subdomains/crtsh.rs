@@ -2,7 +2,6 @@ use chrono::{DateTime, Duration, Utc};
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::sync::Mutex;
 
 use reqwest::header::USER_AGENT;
 
@@ -14,23 +13,11 @@ use crate::{config, flags, helpers, logger};
 
 pub struct Runner {
     config: config::SubdomainsCrtShConfig,
-    processed_domains: Mutex<Vec<String>>,
 }
 
 impl Runner {
     pub fn new(config: config::SubdomainsCrtShConfig) -> Self {
-        Runner {
-            config,
-            processed_domains: Mutex::new(Vec::new()),
-        }
-    }
-
-    pub fn process(&self, domain: String) {
-        self.processed_domains.lock().unwrap().push(domain)
-    }
-
-    pub fn has_processed(&self, domain: String) -> bool {
-        self.processed_domains.lock().unwrap().contains(&domain)
+        Runner { config }
     }
 }
 
@@ -50,17 +37,11 @@ impl Module for Runner {
     fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
         let domain = match event {
             Event::DiscoveredDomain(domain) => domain,
-            _ => {
-                return Err("Received wrong event, exiting module".to_string());
-            }
+            _ => return Err("Received wrong event, exiting module".to_string()),
         };
 
         let ignore_expired = self.config.ignore_expired.unwrap_or(false);
         let recent_only = self.config.recent_only.unwrap_or(false);
-        if self.has_processed(domain.to_string()) {
-            return Ok(());
-        }
-        self.process(domain.to_string());
 
         let response = session
             .get_http_client()

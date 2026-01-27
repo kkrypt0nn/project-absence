@@ -4,11 +4,24 @@ use std::{
     sync::{Arc, RwLock},
 };
 
+use crate::modules;
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct DomainFetched {
+    pub domain: String,
+    pub response: modules::request::HttpResponse,
+}
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Event {
     Ready,
-    /// String: the discovered domain
+
+    /// A domain was discovered for the first time
     DiscoveredDomain(String),
+
+    /// A domain has been requested
+    DomainFetched(Box<DomainFetched>),
+
     FinishedTask,
 }
 
@@ -20,6 +33,9 @@ impl fmt::Display for Event {
             }
             Event::DiscoveredDomain(_) => {
                 write!(f, "discovered:domain")
+            }
+            Event::DomainFetched(_) => {
+                write!(f, "domain:fetched")
             }
             Event::FinishedTask => write!(f, "finished:task"),
         }
