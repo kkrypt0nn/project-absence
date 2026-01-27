@@ -22,6 +22,9 @@ enabled_runners = ["wayback_machine"]
 [endpoints.wayback_machine]
 timeout = 30
 
+[infrastructure]
+enabled = true
+
 [subdomains]
 enabled_runners = ["dork", "crtsh"]
 
@@ -62,11 +65,18 @@ pub struct Config {
     pub domain_takeover: Option<DomainTakeoverConfig>,
     pub endpoints: Option<EndpointsConfig>,
     pub emails: Option<EmailsConfig>,
+    pub infrastructure: Option<InfrastructureConfig>,
     pub subdomains: Option<SubdomainsConfig>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DomainTakeoverConfig {
+    /// Whether the module is enabled
+    pub enabled: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct InfrastructureConfig {
     /// Whether the module is enabled
     pub enabled: bool,
 }

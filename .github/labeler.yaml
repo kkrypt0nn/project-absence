@@ -56,6 +56,11 @@ module/domain-takeover:
       - any-glob-to-any-file:
           - src/modules/domain_takeover/**/*
 
+module/infrastructure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/infrastructure/**/*
+
 module/scripting:
   - changed-files:
       - any-glob-to-any-file:
