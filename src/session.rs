@@ -167,6 +167,17 @@ impl Session {
                 let permit = session.get_state().get_semaphore_permit();
                 let event_clone = e.clone();
 
+                if session.get_state().is_debug_or_verbose() {
+                    logger::trace(
+                        "bus:run",
+                        format!(
+                            "Running module {} as the event {:?} has been emitted",
+                            module_clone.name(),
+                            e,
+                        ),
+                    );
+                }
+
                 thread::spawn(move || {
                     if let Err(e) = module_clone.execute(&session, &event_clone) {
                         logger::error(module_clone.name(), e);
@@ -184,6 +195,7 @@ impl Session {
     // TODO: Include in the cleanup a way to not have to add the runners manually? Maybe some register_runner macro for the module?
     pub fn register_config_modules(self: &Arc<Self>) {
         self.register_module(modules::ready::ModuleReady::new());
+        self.register_module(modules::request::ModuleRequest::new());
 
         // Load Lua module
         // TODO: Allow multiple Lua modules in the future. For the current PoC, one is fine.
@@ -212,10 +224,10 @@ impl Session {
             }
         }
 
-        if let Some(domain_takeover_cfg) = &self.config.domain_takeover {
-            if domain_takeover_cfg.enabled {
-                self.register_module(modules::domain_takeover::ModuleDomainTakeover::new());
-            }
+        if let Some(domain_takeover_cfg) = &self.config.domain_takeover
+            && domain_takeover_cfg.enabled
+        {
+            self.register_module(modules::domain_takeover::ModuleDomainTakeover::new());
         }
 
         if let Some(emails_cfg) = &self.config.emails {
@@ -263,10 +275,10 @@ impl Session {
             }
         }
 
-        if let Some(infrastructure_cfg) = &self.config.infrastructure {
-            if infrastructure_cfg.enabled {
-                self.register_module(modules::infrastructure::ModuleInfrastructure::new());
-            }
+        if let Some(infrastructure_cfg) = &self.config.infrastructure
+            && infrastructure_cfg.enabled
+        {
+            self.register_module(modules::infrastructure::ModuleInfrastructure::new());
         }
     }
 

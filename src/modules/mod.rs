@@ -4,6 +4,7 @@ pub mod discovery;
 pub mod domain_takeover;
 pub mod infrastructure;
 pub mod ready;
+pub mod request;
 pub mod scripting;
 
 pub trait Module: Send + Sync {

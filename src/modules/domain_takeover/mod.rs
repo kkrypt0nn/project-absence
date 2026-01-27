@@ -1,12 +1,10 @@
 use std::collections::HashMap;
 
-use reqwest::header::USER_AGENT;
-
 use crate::database::node::Type;
 use crate::event_bus::Event;
 use crate::modules::Module;
 use crate::session::Session;
-use crate::{flags, helpers, logger};
+use crate::{flags, logger};
 
 pub struct ModuleDomainTakeover {
     platforms: HashMap<String, String>,
@@ -64,47 +62,34 @@ impl Module for ModuleDomainTakeover {
     }
 
     fn subscribers(&self) -> Vec<String> {
-        vec![String::from("discovered:domain")]
+        vec![String::from("domain:fetched")]
     }
 
     fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
-        let domain = match event {
-            Event::DiscoveredDomain(domain) => domain,
-            _ => {
-                return Err("Received wrong event, exiting module".to_string());
-            }
+        let fetched_data = match event {
+            Event::DomainFetched(fetched_data) => fetched_data,
+            _ => return Err("Received wrong event, exiting module".to_string()),
         };
+        let domain = &fetched_data.domain;
+        let body = &fetched_data.response.body;
 
-        let response = reqwest::blocking::Client::new()
-            .get(format!("https://{}", domain))
-            .header(USER_AGENT, helpers::ua::get_random())
-            .send();
-        match response {
-            Ok(response) => {
-                let body = response.text().unwrap_or_default();
-
-                for (platform, content) in self.platforms.iter() {
-                    if body.contains(content) {
-                        if let Some(parent) =
-                            session.get_database().search(Type::Domain, domain.clone())
-                        {
-                            parent.add_data(
-                                String::from("possible_takeover"),
-                                platform.to_string().into(),
-                            );
-                            parent.add_flag(flags::domain::POSSIBLE_TAKEOVER);
-                        }
-                        logger::println(
-                            self.name_with_platform(platform.to_string()),
-                            format!("Domain takeover possible for '{}'", domain),
-                        );
-                        break;
-                    }
+        for (platform, content) in self.platforms.iter() {
+            if body.contains(content) {
+                if let Some(parent) = session.get_database().search(Type::Domain, domain.clone()) {
+                    parent.add_data(
+                        String::from("possible_takeover"),
+                        platform.to_string().into(),
+                    );
+                    parent.add_flag(flags::domain::POSSIBLE_TAKEOVER);
                 }
-
-                Ok(())
+                logger::println(
+                    self.name_with_platform(platform.to_string()),
+                    format!("Domain takeover possible for '{}'", domain),
+                );
+                break;
             }
-            Err(_) => Err(format!("Failed performing a request to '{}'", domain)),
         }
+
+        Ok(())
     }
 }

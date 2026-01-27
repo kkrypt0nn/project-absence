@@ -41,20 +41,20 @@ pub fn create_file_if_not_existing() {
         .or_else(|_| env::var("USERPROFILE"))
         .unwrap_or_else(|_| String::from(""));
     let path = PathBuf::from(format!("{}/.absence/config.toml", home_dir));
-    if !path.exists() {
-        if let Some(parent) = path.parent() {
-            if fs::create_dir_all(parent).is_err() {
-                logger::error(
-                    "setup",
-                    "Failed creating the directories for the default config file",
-                );
-            }
-            if fs::write(path, DEFAULT_CONFIG).is_err() {
-                logger::error(
-                    "setup",
-                    "Failed writing the default content of the config file",
-                );
-            }
+    if !path.exists()
+        && let Some(parent) = path.parent()
+    {
+        if fs::create_dir_all(parent).is_err() {
+            logger::error(
+                "setup",
+                "Failed creating the directories for the default config file",
+            );
+        }
+        if fs::write(path, DEFAULT_CONFIG).is_err() {
+            logger::error(
+                "setup",
+                "Failed writing the default content of the config file",
+            );
         }
     }
 }
