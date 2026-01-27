@@ -14,6 +14,7 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
       - name: Run rustfmt
         run: cargo fmt --all -- --check --verbose
   clippy:
@@ -22,12 +23,25 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features
+  audit:
+    name: audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run cargo audit
+        run: cargo audit
   test:
     name: Test
     runs-on: ${{ matrix.os }}
-    needs: [rustfmt, clippy]
+    needs: [rustfmt, clippy, audit]
     strategy:
       matrix:
         os:
@@ -40,13 +54,17 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
       - name: Install dependencies for clipboard crate
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install -y libxcb1-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+
       - name: Install nightly toolchain
         if: matrix.toolchain == 'nightly'
         run: rustup toolchain install nightly
+
       - name: Build
         run: cargo +${{ matrix.toolchain }} build --all --no-default-features --all-features
+
       - name: Test
         run: cargo +${{ matrix.toolchain }} test --all --no-default-features --all-features

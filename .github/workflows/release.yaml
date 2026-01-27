@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (must start with v)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Release new version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: 24.13.0
+
+      - name: Validate version
+        run: |
+          [[ "${VERSION}" == v* ]] || (echo "Version must start with v" && exit 1)
+        env:
+          VERSION: ${{ inputs.version }}
+
+      - name: Extract version without v
+        run: echo "VERSION_NO_V=${VERSION#v}" >> $GITHUB_ENV
+        env:
+          VERSION: ${{ inputs.version }}
+
+      - name: Update latest version everywhere
+        run: |
+          sed -i -E 's/^version = ".*"/version = "'"${VERSION_NO_V}"'"/' Cargo.toml
+          cd website
+          npm version "${VERSION_NO_V}" --no-git-tag-version
+          cd ..
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add Cargo.toml website/package.json website/package-lock.json
+            git commit -m "chore: Update version to ${VERSION_NO_V}"
+            git push origin HEAD
+          fi
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git push origin "$VERSION"
+        env:
+          VERSION: ${{ inputs.version }}
+
+      - name: Install dependencies for clipboard crate
+        run: sudo apt-get install -y libxcb1-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+
+      - name: Publish
+        run: cargo publish --verbose --all-features --token ${{ secrets.CARGO_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            kkrypt0nn/project-absence:latest
+            kkrypt0nn/project-absence:${{ env.VERSION_NO_V }}
+            ghcr.io/kkrypt0nn/project-absence:latest
+            ghcr.io/kkrypt0nn/project-absence:${{ env.VERSION_NO_V }}

@@ -4,9 +4,6 @@ use std::path::PathBuf;
 use std::sync::{Arc, Condvar, Mutex, MutexGuard};
 use std::{env, thread};
 
-#[cfg(feature = "clipboard")]
-use clipboard::{ClipboardContext, ClipboardProvider};
-
 use reqwest::blocking::{Client, ClientBuilder};
 
 use crate::event_bus::{self, EventBus};
@@ -56,7 +53,7 @@ impl Session {
         &self.args
     }
 
-    pub fn get_database(&self) -> MutexGuard<database::Database> {
+    pub fn get_database(&self) -> MutexGuard<'_, database::Database> {
         self.database.lock().unwrap()
     }
 
@@ -75,9 +72,11 @@ impl Session {
     fn output_results(&self) -> Result<(), Error> {
         #[cfg(feature = "clipboard")]
         if self.get_args().clipboard {
-            let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-            if ctx
-                .set_contents(self.get_database().get_as_pretty_json())
+            use arboard::Clipboard;
+
+            let mut clipboard = Clipboard::new().unwrap();
+            if clipboard
+                .set_text(self.get_database().get_as_pretty_json())
                 .is_ok()
             {
                 logger::info(

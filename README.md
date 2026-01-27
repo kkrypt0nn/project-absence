@@ -70,7 +70,7 @@ cargo build --release
 > - `libxcb-shape0-dev`
 > - `libxcb-xfixes0-dev`
 >
-> They are required for the [`clipboard`](https://crates.io/crates/clipboard) crate to work properly. The usage of the crate may be put behind a feature in the future so that you are not forced to install these packages.
+> They are required for the [`arboard`](https://crates.io/crates/arboard) crate to work properly. The usage of the crate has been put behind a feature in the future so that you are not forced to install these packages.
 
 ### Example Usage
 
