@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 
 const USER_AGENTS: [&str; 1000] = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.0 Safari/537.36",
