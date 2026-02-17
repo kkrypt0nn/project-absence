@@ -39,8 +39,20 @@ const sidebars = {
     },
     {
       type: "category",
+      label: "Tutorials",
+      items: ["tutorials/first_script"],
+      collapsed: true,
+    },
+    {
+      type: "category",
       label: "Scripting",
-      items: ["scripting/basics"],
+      items: [
+        "scripting/basics",
+        "scripting/events",
+        "scripting/session",
+        "scripting/database",
+        "scripting/globals",
+      ],
       collapsed: true,
     },
   ],

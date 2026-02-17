@@ -57,6 +57,10 @@ impl Session {
         self.database.lock().unwrap()
     }
 
+    pub fn get_database_arc(&self) -> Arc<Mutex<database::Database>> {
+        Arc::clone(&self.database)
+    }
+
     pub fn get_state(&self) -> Arc<state::State> {
         Arc::clone(&self.state)
     }

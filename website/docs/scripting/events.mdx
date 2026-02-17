@@ -1,0 +1,42 @@
+---
+title: Events
+description: Learn how to work with events inside Lua scripts.
+---
+
+Events are exposed to Lua as a `LuaEvent` userdata object.
+
+## Available methods
+
+### `event:name() -> string`
+
+Returns the event name.
+
+```lua
+local name = event:name()
+```
+
+### `event:is() -> boolean`
+
+Checks if the event matches a given name.
+
+```lua
+if event:is("discovered:domain") then
+  -- Do something here...
+end
+```
+
+### `event:domain() -> string | nil`
+
+Returns the domain if the event contains one.
+
+Supported events:
+
+- `discovered:domain`
+- `domain:fetched`
+
+```lua
+local domain = event:domain()
+if domain then
+  logger:println("Domain: " .. domain)
+end
+```

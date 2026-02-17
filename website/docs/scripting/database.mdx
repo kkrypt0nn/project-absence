@@ -1,0 +1,22 @@
+---
+title: Database
+description: Modify existing nodes from Lua scripts.
+---
+
+The database is accessed through the session:
+
+```lua
+local db = session:database()
+```
+
+The `LuaDatabase` object allows limited interaction with the internal database.
+
+## Available methods
+
+### `add_data(type: string, node_name: string, key: string, value: string)`
+
+Adds metadata to an existing node.
+
+```lua
+db:add_data("domain", "example.com", "hello_from", "lua_script")
+```

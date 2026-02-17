@@ -1,0 +1,20 @@
+---
+title: Session
+description: Access runtime state and interact with the database.
+---
+
+The `session` parameter is passed into your `execute()` function.
+
+```lua
+function MyScript:execute(session, event)
+```
+
+The session provides access to internal runtime state and the database.
+
+## Available methods
+
+### `session:database() -> LuaDatabase`
+
+Returns a `LuaDatabase` object that allows you to modify existing nodes.
+
+See the [Database](database.mdx) page for all available methods.

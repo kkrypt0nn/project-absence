@@ -3,9 +3,13 @@ use std::fs;
 use mlua::Function;
 
 use crate::event_bus::Event;
-use crate::logger;
 use crate::modules::Module;
+use crate::modules::scripting::userdata::event::LuaEvent;
+use crate::modules::scripting::userdata::session::LuaSession;
 use crate::session::Session;
+
+mod globals;
+mod userdata;
 
 pub struct Scripting {
     lua: mlua::Lua,
@@ -24,20 +28,7 @@ impl Scripting {
 
     fn setup_globals(&self) -> Result<(), String> {
         // TODO: Expose more functions and structs
-        // Maybe worth having an 'impl IntoLua' for all the special structs, e.g. the database nodes
-        let globals = self.lua.globals();
-        globals
-            .set(
-                "println",
-                self.lua
-                    .create_function(move |_, message: String| {
-                        logger::println(String::from("lua:script"), message);
-                        Ok(())
-                    })
-                    .map_err(|e| e.to_string())?,
-            )
-            .map_err(|e| e.to_string())?;
-        Ok(())
+        globals::register(&self.lua).map_err(|e| e.to_string())
     }
 }
 
@@ -64,13 +55,15 @@ impl Module for Scripting {
             .unwrap_or_default()
     }
 
-    fn execute(&self, _: &Session, _: &Event) -> Result<(), String> {
-        if let Ok(execute_fn) = self.module.get::<mlua::Function>("execute") {
-            // The session methods should be made globally availble. Likely as a table
-            // The context args should be passed as a of string, convert everthing
-            if let Err(e) = execute_fn.call::<bool>("") {
-                return Err(e.to_string());
-            }
+    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+        if let Ok(execute_fn) = self.module.get::<mlua::Function>("execute")
+            && let Err(e) = execute_fn.call::<bool>((
+                self.name(),
+                LuaSession::new(session),
+                LuaEvent::new(event),
+            ))
+        {
+            return Err(e.to_string());
         }
         Ok(())
     }

@@ -1,37 +1,60 @@
 ---
 title: Basics
-description: Project Absence supports Lua files for scripting.
+description: Learn how Lua scripting works in Project Absence.
 ---
 
 :::warning
-Currently scripting is in its **very early stage**, just at a PoC state, hence it shouldn't be used at the moment.
+Currently scripting is in its **very early stage**, just at a PoC state, breaking changes may happen at **any** time.
 
 More will be worked on scripting once the core modules have been worked on and the tool is on a more stable state.
 :::
 
-Project Absence supports Lua files for scripting. Each Lua script must have the following code, so that it can be loaded and later executed once one of the events is emitted.
+Project Absence supports Lua files for scripting. Each Lua script acts as a module and must return a table containing specific required methods.
+
+## Minimal script structure
+
+Every Lua script must:
+
+- Return a table (essentially the module)
+- Implement a set of required pre-defined methods
+  - These methods must return pre-defined values
+
+Example:
 
 ```lua
-ExampleModule = {}
+MyScript = {}
 
-function ExampleModule:noise_level()
-    return "None"
-end
-
-function ExampleModule:description()
+function MyScript:description()
     return "This example module/script will just print 'Hello from Lua!' when a 'Ready' event has been emitted."
 end
 
-function ExampleModule:subscribers()
-    return { "Ready" }
+function MyScript:subscribers()
+    return { "ready" }
 end
 
-function ExampleModule:execute()
+function MyScript:execute()
     println("$[fg:blue]$[effect:bold]Hello from Lua!$[reset]")
     return true
 end
 
-return ExampleModule
+return MyScript
 ```
 
-The methods **must** be set and have a return value as per the example above.
+## Required methods
+
+### `description() -> string`
+
+Returns the description of your script.
+
+### `subscribers() -> table<string>`
+
+Returns a list of event names your script listens to.
+
+### `execute(...) -> boolean`
+
+Called when one of your subscribed events is emitted.
+
+Must return:
+
+- `true` on success
+- `false` on failure

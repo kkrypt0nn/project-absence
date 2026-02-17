@@ -1,0 +1,20 @@
+---
+title: Globals
+description: Built-in global objects available in Lua.
+---
+
+The following globals are automatically registered.
+
+## `logger`
+
+A global logging object.
+
+### `logger:println(message: string)`
+
+Prints a message using the internal logger.
+
+```lua
+logger:println("Hello from Lua!")
+```
+
+Output will be prefixed with `lua:script`.

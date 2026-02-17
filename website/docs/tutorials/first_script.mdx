@@ -1,0 +1,123 @@
+---
+title: Creating your first script
+description: Step-by-step tutorial for writing your first Lua script in Project Absence.
+---
+
+:::warning
+Currently scripting is in its **very early stage**, just at a PoC state, breaking changes may happen at **any** time.
+:::
+
+This tutorial walks you through creating a Lua script that reacts to newly discovered domains and adds metadata to them.
+
+## Build the script
+
+### Step 1 - Define the script module table and description
+
+In your new Lua script file, add the required table with the description of the script.
+
+```lua
+MyFirstScript = {}
+
+function MyFirstScript:description()
+    return "This script adds metadata when a new domain is discovered."
+end
+```
+
+### Step 2 - Subscribe to an event
+
+As we want to react when a domain is discovered, we subscribe to the event `discovered:domain`.
+
+```lua
+function MyFirstScript:subscribers()
+    return { "discovered:domain" }
+end
+```
+
+### Step 3 - Implement the `execute` method
+
+This function is called when the event fires. We make sure the event is `discovered:domain`, this is mainly useful if you listen to multiple events, then add the metadata to the node in the database.
+
+```lua
+function MyFirstScript:execute(module_name, session, event)
+    if not event:is("discovered:domain") then
+        return true
+    end
+
+    local domain = event:domain()
+    if not domain then
+        logger:println("No domain found in event")
+        return false
+    end
+
+    logger:println("Discovered domain: " .. domain)
+
+    local db = session:database()
+    db:add_data("domain", domain, "source", "my_first_script")
+
+    logger:println("Added metadata to " .. domain)
+    return true
+end
+```
+
+### Step 4 - Return the table
+
+This is required for the script to work.
+
+```lua
+return MyFirstScript
+```
+
+### Final script
+
+```lua
+MyFirstScript = {}
+
+function MyFirstScript:description()
+    return "This script adds metadata when a new domain is discovered."
+end
+
+function MyFirstScript:subscribers()
+    return { "discovered:domain" }
+end
+
+function MyFirstScript:execute(session, event)
+    if not event:is("discovered:domain") then
+        return true
+    end
+
+    local domain = event:domain()
+    if not domain then
+        logger:println("No domain found in event")
+        return false
+    end
+
+    logger:println("Discovered domain: " .. domain)
+
+    local db = session:database()
+    db:add_data("domain", domain, "source", "my_first_script")
+
+    logger:println("Added metadata to " .. domain)
+    return true
+end
+
+return MyFirstScript
+```
+
+## Run the script
+
+After running the script on Project Absence, you will then dee the metadata added to the resulting JSON file:
+
+```bash
+$ project-absence --domain <domain> --script scripts/my_first_script.lua
+# ...
+
+$ cat ~/.absence/results.json
+{
+  "type": "domain",
+  "value": "<domain>",
+  "connections": [],
+  "data": {
+    "source": "my_first_script"
+  }
+}
+```
