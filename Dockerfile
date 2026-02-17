@@ -1,7 +1,7 @@
-FROM debian:bookworm-slim AS base
+FROM debian:trixie-slim AS base
 RUN apt-get update && apt-get install -y libssl-dev ca-certificates pkg-config
 
-FROM rust:slim-bookworm AS builder
+FROM rust:slim-trixie AS builder
 COPY --from=base / /
 WORKDIR /app
 ADD . /app
