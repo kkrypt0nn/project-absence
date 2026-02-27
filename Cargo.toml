@@ -21,7 +21,7 @@ clipboard = ["dep:arboard"]
 [dependencies]
 arboard = { version = "=3.6.1", optional = true }
 base64 = "=0.22.1"
-chrono = "=0.4.43"
+chrono = "=0.4.44"
 clap = { version = "=4.5.60", features = ["derive"] }
 human_bytes = "=0.4.3"
 memory-stats = "=1.2.0"
