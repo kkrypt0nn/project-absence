@@ -38,7 +38,7 @@
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
     "prettier-plugin-organize-imports": "4.3.0",
-    "typescript": "5.9.3"
+    "typescript": "6.0.2"
   },
   "browserslist": {
     "production": [
