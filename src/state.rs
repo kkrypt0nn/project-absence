@@ -28,7 +28,8 @@ impl State {
     pub fn new(verbose: bool, debug: bool) -> Self {
         State {
             active_tasks: Arc::new(AtomicUsize::new(0)),
-            semaphore: simple_semaphore::Semaphore::default(),
+            semaphore: simple_semaphore::Semaphore::new_available_parallelism()
+                .unwrap_or(simple_semaphore::Semaphore::new(8)),
             verbose,
             debug,
 
