@@ -32,6 +32,7 @@ const sidebars = {
             "modules/discovery/subdomains",
           ],
         },
+        "modules/dns",
         "modules/domain_takeover",
         "modules/infrastructure",
       ],

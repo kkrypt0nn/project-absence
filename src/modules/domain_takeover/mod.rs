@@ -7,7 +7,7 @@ use crate::session::Session;
 use crate::{flags, logger};
 
 pub struct ModuleDomainTakeover {
-    platforms: HashMap<String, String>,
+    platforms: HashMap<&'static str, &'static str>,
 }
 
 impl ModuleDomainTakeover {
@@ -15,37 +15,23 @@ impl ModuleDomainTakeover {
         ModuleDomainTakeover {
             platforms: HashMap::from([
                 (
-                    String::from("github"),
-                    String::from("<p><strong>There isn't a GitHub Pages site here.</strong></p>"),
+                    "github",
+                    "<p><strong>There isn't a GitHub Pages site here.</strong></p>",
                 ),
+                ("glitch", "<h1>Well, you found a glitch.</h1>"),
                 (
-                    String::from("glitch"),
-                    String::from("<h1>Well, you found a glitch.</h1>"),
+                    "heroku",
+                    "<iframe src=\"//www.herokucdn.com/error-pages/no-such-app.html\"></iframe>",
                 ),
-                (
-                    String::from("heroku"),
-                    String::from(
-                        "<iframe src=\"//www.herokucdn.com/error-pages/no-such-app.html\"></iframe>",
-                    ),
-                ),
-                (
-                    String::from("netlify"),
-                    String::from("Not Found - Request ID: "),
-                ),
-                (
-                    String::from("railway"),
-                    String::from("Application not found"),
-                ),
-                (String::from("replit"), String::from("Not Found")),
-                (
-                    String::from("vercel"),
-                    String::from("The deployment could not be found on Vercel."),
-                ),
+                ("netlify", "Not Found - Request ID: "),
+                ("railway", "Application not found"),
+                ("replit", "Not Found"),
+                ("vercel", "The deployment could not be found on Vercel."),
             ]),
         }
     }
 
-    fn name_with_platform(&self, platform: String) -> String {
+    fn name_with_platform(&self, platform: &str) -> String {
         format!("{}({})", self.name(), platform)
     }
 }
@@ -73,17 +59,14 @@ impl Module for ModuleDomainTakeover {
         let domain = &fetched_data.domain;
         let body = &fetched_data.response.body;
 
-        for (platform, content) in self.platforms.iter() {
+        for (&platform, content) in self.platforms.iter() {
             if body.contains(content) {
                 if let Some(parent) = session.get_database().search(Type::Domain, domain.clone()) {
-                    parent.add_data(
-                        String::from("possible_takeover"),
-                        platform.to_string().into(),
-                    );
+                    parent.add_data(String::from("possible_takeover"), platform.into());
                     parent.add_flag(flags::domain::POSSIBLE_TAKEOVER);
                 }
                 logger::println(
-                    self.name_with_platform(platform.to_string()),
+                    self.name_with_platform(platform),
                     format!("Domain takeover possible for '{}'", domain),
                 );
                 break;

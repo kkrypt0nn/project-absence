@@ -10,6 +10,9 @@ use crate::{
 const DEFAULT_CONFIG: &str = r#"[domain_takeover]
 enabled = true
 
+[dns]
+enabled = true
+
 [emails]
 enabled_runners = ["dork"]
 
@@ -63,6 +66,7 @@ pub fn create_file_if_not_existing() {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub domain_takeover: Option<DomainTakeoverConfig>,
+    pub dns: Option<DnsConfig>,
     pub endpoints: Option<EndpointsConfig>,
     pub emails: Option<EmailsConfig>,
     pub infrastructure: Option<InfrastructureConfig>,
@@ -71,6 +75,12 @@ pub struct Config {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DomainTakeoverConfig {
+    /// Whether the module is enabled
+    pub enabled: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct DnsConfig {
     /// Whether the module is enabled
     pub enabled: bool,
 }

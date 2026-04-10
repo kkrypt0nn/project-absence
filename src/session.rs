@@ -284,6 +284,12 @@ impl Session {
         {
             self.register_module(modules::infrastructure::ModuleInfrastructure::new());
         }
+
+        if let Some(dns_cfg) = &self.config.dns
+            && dns_cfg.enabled
+        {
+            self.register_module(modules::dns::ModuleDns::new());
+        }
     }
 
     pub fn run(self: &Arc<Self>) -> Result<(), Error> {

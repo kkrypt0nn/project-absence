@@ -1,3 +1,4 @@
+pub mod dns;
 pub mod domain;
 
 pub const ZERO: usize = 0;
