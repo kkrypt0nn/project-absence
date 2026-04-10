@@ -83,7 +83,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
 
-      - uses: Swatinem/rust-cache@f51f967e158417aafa338a1e46ab22095f07aa01 # v2
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           shared-key: ${{ matrix.os }}-${{ matrix.toolchain }}
           save-if: ${{ github.ref == 'refs/heads/main' }}
