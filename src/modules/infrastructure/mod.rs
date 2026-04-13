@@ -26,6 +26,15 @@ impl ModuleInfrastructure {
                         "via:cloudfront.net",
                     ],
                 ),
+                (
+                    "azure",
+                    vec![
+                        "header:x-azure-ref",
+                        "header:x-azure-originstatuscode",
+                        "header:x-azure-internalerror",
+                        "header:x-azure-externalerror",
+                    ],
+                ),
                 ("heroku", vec!["server:heroku", "via:heroku-router"]),
                 (
                     "vercel",
@@ -45,6 +54,7 @@ impl ModuleInfrastructure {
                 "set-cookie",
                 "last-modified",
                 "x-lae-region",
+                "x-azure-debuginfo",
             ],
             security_headers: vec![
                 "content-security-policy",
