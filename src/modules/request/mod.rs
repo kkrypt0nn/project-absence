@@ -100,7 +100,12 @@ impl Module for ModuleRequest {
         let headers = response
             .headers()
             .iter()
-            .map(|(k, v)| (k.to_string(), v.to_str().unwrap_or("").to_string()))
+            .map(|(k, v)| {
+                (
+                    k.to_string().to_lowercase(),
+                    v.to_str().unwrap_or_default().to_string().to_lowercase(),
+                )
+            })
             .collect();
         let tls = response.extensions().get::<TlsInfo>().and_then(|tls_info| {
             tls_info.peer_certificate().and_then(|der| {

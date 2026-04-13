@@ -8,6 +8,7 @@ use crate::modules::Module;
 use crate::session::Session;
 
 pub struct ModuleInfrastructure {
+    cloud_provider: HashMap<&'static str, Vec<&'static str>>,
     interesting_headers: Vec<&'static str>,
     security_headers: Vec<&'static str>,
 }
@@ -15,21 +16,45 @@ pub struct ModuleInfrastructure {
 impl ModuleInfrastructure {
     pub fn new() -> Self {
         ModuleInfrastructure {
+            cloud_provider: HashMap::from([
+                (
+                    "amazon",
+                    vec![
+                        "header:x-amz-cf-id",
+                        "header:x-amz-cf-pop",
+                        "header:x-lae-region",
+                        "via:cloudfront.net",
+                    ],
+                ),
+                ("heroku", vec!["server:heroku", "via:heroku-router"]),
+                (
+                    "vercel",
+                    vec![
+                        "header:x-vercel-cache",
+                        "header:x-vercel-id",
+                        "server:vercel",
+                    ],
+                ),
+            ]),
             interesting_headers: vec![
                 "server",
                 "x-powered-by",
+                "x-served-by",
                 "cf-ray",
                 "authorization",
                 "set-cookie",
                 "last-modified",
+                "x-lae-region",
             ],
             security_headers: vec![
-                "Content-Security-Policy",
-                "Strict-Transport-Security",
-                "X-Content-Type-Options",
-                "X-Frame-Options",
-                "Referrer-Policy",
-                "Permissions-Policy",
+                "content-security-policy",
+                "strict-transport-security",
+                "x-content-type-options",
+                "x-frame-options",
+                "referrer-policy",
+                "permissions-policy",
+                "tls-version",
+                "tls-cipher-name",
             ],
         }
     }
@@ -85,10 +110,30 @@ impl Module for ModuleInfrastructure {
                 security_headers.insert(name, value);
             }
         }
+
+        let cloud_provider = self.cloud_provider.iter().find_map(|(provider, checks)| {
+            checks.iter().find_map(|check| {
+                let (prefix, value) = check.split_once(':')?;
+                match prefix {
+                    "header" => headers
+                        .iter()
+                        .any(|(name, _)| name == value)
+                        .then_some(*provider),
+                    _ => headers.iter().find(|(name, _)| name == prefix).and_then(
+                        |(_, header_value)| header_value.contains(value).then_some(*provider),
+                    ),
+                }
+            })
+        });
+
         if let Some(parent) = session
             .get_database()
             .search(Type::Domain, domain.to_string())
         {
+            parent.add_data(
+                "cloud_provider".to_string(),
+                serde_json::to_value(cloud_provider).unwrap(),
+            );
             parent.add_data(
                 "interesting_headers".to_string(),
                 serde_json::to_value(interesting_headers).unwrap(),
@@ -99,7 +144,18 @@ impl Module for ModuleInfrastructure {
             );
             logger::println(
                 self.name(),
-                format!("Gathered interesting and security headers for {}", domain),
+                format!(
+                    "Gathered interesting and security headers for {}{}",
+                    domain,
+                    if let Some(cloud_provider) = cloud_provider {
+                        format!(
+                            ", as well as the potential cloud provider ({})",
+                            cloud_provider
+                        )
+                    } else {
+                        "".to_string()
+                    }
+                ),
             );
         }
 
