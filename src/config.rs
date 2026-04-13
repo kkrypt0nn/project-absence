@@ -1,4 +1,4 @@
-use std::{env, fs, path::PathBuf};
+use std::{collections::HashMap, env, fs, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 
@@ -12,6 +12,10 @@ enabled = true
 
 [dns]
 enabled = true
+record_types = ["a", "aaaa", "caa", "mx", "soa", "txt"]
+
+[dns.interesting_keywords]
+mx = ["protonmail.ch"]
 
 [emails]
 enabled_runners = ["dork"]
@@ -83,6 +87,16 @@ pub struct DomainTakeoverConfig {
 pub struct DnsConfig {
     /// Whether the module is enabled
     pub enabled: bool,
+    /// The type of DNS records to request for
+    pub record_types: Vec<String>,
+    /// The interesting keywords per record type to flag
+    pub interesting_keywords: DnsInterestingKeywordsConfig,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct DnsInterestingKeywordsConfig {
+    #[serde(flatten)]
+    pub records: HashMap<String, Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

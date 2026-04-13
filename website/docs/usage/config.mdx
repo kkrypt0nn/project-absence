@@ -11,6 +11,10 @@ enabled = true
 
 [dns]
 enabled = true
+record_types = ["a", "aaaa", "caa", "mx", "soa", "txt"]
+
+[dns.interesting_keywords]
+mx = ["protonmail.ch"]
 
 [emails]
 enabled_runners = ["dork"]

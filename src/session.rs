@@ -288,7 +288,7 @@ impl Session {
         if let Some(dns_cfg) = &self.config.dns
             && dns_cfg.enabled
         {
-            self.register_module(modules::dns::ModuleDns::new());
+            self.register_module(modules::dns::ModuleDns::new(dns_cfg.clone()));
         }
     }
 

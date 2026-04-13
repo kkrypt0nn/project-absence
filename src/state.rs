@@ -52,9 +52,8 @@ impl State {
             logger::info(
                 "state",
                 format!(
-                    "tasks={}, permits={}, memory={}",
+                    "tasks={}, memory={}",
                     self.active_tasks_count(),
-                    self.semaphore.available_permits(),
                     human_bytes(usage as f64),
                 ),
             );

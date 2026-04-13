@@ -8,9 +8,9 @@ use domain::resolv::StubResolver;
 use serde::Serialize;
 
 use crate::event_bus::Event;
-use crate::logger;
 use crate::modules::Module;
 use crate::session::Session;
+use crate::{config, flags, logger};
 
 #[derive(Serialize)]
 struct DnsRecordEntry {
@@ -19,16 +19,12 @@ struct DnsRecordEntry {
 }
 
 pub struct ModuleDns {
-    record_types: Vec<&'static str>,
-    interesting_keywords_by_record: HashMap<&'static str, Vec<&'static str>>,
+    config: config::DnsConfig,
 }
 
 impl ModuleDns {
-    pub fn new() -> Self {
-        ModuleDns {
-            record_types: vec!["a", "aaaa", "caa", "mx", "soa", "txt"],
-            interesting_keywords_by_record: HashMap::from([("mx", vec!["protonmail.ch"])]),
-        }
+    pub fn new(config: config::DnsConfig) -> Self {
+        ModuleDns { config }
     }
 
     fn name_with_record_type(&self, record_type: Rtype) -> String {
@@ -62,7 +58,7 @@ impl Module for ModuleDns {
 
         let mut dns_data: HashMap<String, Vec<DnsRecordEntry>> = HashMap::new();
 
-        for record_type in &self.record_types {
+        for record_type in &self.config.record_types {
             let rtype = match Rtype::from_str(record_type) {
                 Ok(r) => r,
                 Err(_) => {
@@ -96,15 +92,15 @@ impl Module for ModuleDns {
                     Ok(rec) => {
                         let data = rec.data().to_string();
                         let mut flags = 0;
-                        if let Some(keywords) = self.interesting_keywords_by_record.get(record_type)
+                        if let Some(keywords) =
+                            self.config.interesting_keywords.records.get(record_type)
+                            && keywords.iter().any(|k| data.contains(k))
                         {
-                            flags |= crate::flags::dns::IS_INTERESTING;
-                            if keywords.iter().any(|k| data.contains(k)) {
-                                logger::println(
-                                    self.name_with_record_type(rtype),
-                                    format!("[INTERESTING] {}", data),
-                                );
-                            }
+                            flags |= flags::dns::IS_INTERESTING;
+                            logger::println(
+                                self.name_with_record_type(rtype),
+                                format!("[INTERESTING] {}", data),
+                            );
                         }
                         dns_data
                             .entry(record_type.to_string())
