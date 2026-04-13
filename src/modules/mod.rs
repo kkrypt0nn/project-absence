@@ -7,6 +7,7 @@ pub mod infrastructure;
 pub mod ready;
 pub mod request;
 pub mod scripting;
+pub mod technologies;
 
 pub trait Module: Send + Sync {
     fn name(&self) -> String;

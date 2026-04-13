@@ -290,6 +290,12 @@ impl Session {
         {
             self.register_module(modules::dns::ModuleDns::new(dns_cfg.clone()));
         }
+
+        if let Some(technologies_cfg) = &self.config.technologies
+            && technologies_cfg.enabled
+        {
+            self.register_module(modules::technologies::ModuleTechnologies::new());
+        }
     }
 
     pub fn run(self: &Arc<Self>) -> Result<(), Error> {

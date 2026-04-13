@@ -41,6 +41,9 @@ search_engine = "ecosia"
 [subdomains.crtsh]
 ignore_expired = false
 recent_only = false
+
+[technologies]
+enabled = true
 "#;
 
 pub fn create_file_if_not_existing() {
@@ -75,6 +78,7 @@ pub struct Config {
     pub emails: Option<EmailsConfig>,
     pub infrastructure: Option<InfrastructureConfig>,
     pub subdomains: Option<SubdomainsConfig>,
+    pub technologies: Option<TechnologiesConfig>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -155,4 +159,10 @@ pub struct SubdomainsCrtShConfig {
     pub ignore_expired: Option<bool>,
     /// Only care about the recently (24 hours) created certificates
     pub recent_only: Option<bool>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct TechnologiesConfig {
+    /// Whether the module is enabled
+    pub enabled: bool,
 }
