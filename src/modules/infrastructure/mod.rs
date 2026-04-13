@@ -33,6 +33,7 @@ impl ModuleInfrastructure {
                         "header:x-azure-originstatuscode",
                         "header:x-azure-internalerror",
                         "header:x-azure-externalerror",
+                        "header:x-azure-region",
                     ],
                 ),
                 ("heroku", vec!["server:heroku", "via:heroku-router"]),
@@ -54,6 +55,7 @@ impl ModuleInfrastructure {
                 "set-cookie",
                 "last-modified",
                 "x-lae-region",
+                "x-azure-region",
                 "x-azure-debuginfo",
             ],
             security_headers: vec![
