@@ -8,19 +8,28 @@ use crate::modules::Module;
 use crate::session::Session;
 
 pub struct ModuleInfrastructure {
-    headers_list: Vec<&'static str>,
+    interesting_headers: Vec<&'static str>,
+    security_headers: Vec<&'static str>,
 }
 
 impl ModuleInfrastructure {
     pub fn new() -> Self {
         ModuleInfrastructure {
-            headers_list: vec![
+            interesting_headers: vec![
                 "server",
                 "x-powered-by",
                 "cf-ray",
                 "authorization",
                 "set-cookie",
                 "last-modified",
+            ],
+            security_headers: vec![
+                "Content-Security-Policy",
+                "Strict-Transport-Security",
+                "X-Content-Type-Options",
+                "X-Frame-Options",
+                "Referrer-Policy",
+                "Permissions-Policy",
             ],
         }
     }
@@ -66,10 +75,14 @@ impl Module for ModuleInfrastructure {
             }
         }
 
-        let mut useful_headers = HashMap::new();
+        let mut interesting_headers = HashMap::new();
+        let mut security_headers = HashMap::new();
         for (name, value) in headers {
-            if self.headers_list.contains(&name.as_str()) {
-                useful_headers.insert(name, value);
+            if self.interesting_headers.contains(&name.as_str()) {
+                interesting_headers.insert(name, value);
+            }
+            if self.security_headers.contains(&name.as_str()) {
+                security_headers.insert(name, value);
             }
         }
         if let Some(parent) = session
@@ -77,10 +90,17 @@ impl Module for ModuleInfrastructure {
             .search(Type::Domain, domain.to_string())
         {
             parent.add_data(
-                "headers".to_string(),
-                serde_json::to_value(useful_headers).unwrap(),
+                "interesting_headers".to_string(),
+                serde_json::to_value(interesting_headers).unwrap(),
             );
-            logger::println(self.name(), format!("Gathered headers data for {}", domain));
+            parent.add_data(
+                "security_headers".to_string(),
+                serde_json::to_value(security_headers).unwrap(),
+            );
+            logger::println(
+                self.name(),
+                format!("Gathered interesting and security headers for {}", domain),
+            );
         }
 
         Ok(())
