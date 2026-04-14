@@ -61,7 +61,7 @@ jobs:
           VERSION: ${{ inputs.version }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@4dd30955cca228da305ffee6fbc3fc1f95d447c2 # v3
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
         with:
           tag_name: ${{ inputs.version }}
           name: Release ${{ inputs.version }}
