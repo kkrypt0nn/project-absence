@@ -16,15 +16,13 @@
 ---
 
 > [!CAUTION]
-> This is a WIP tool that is **very unstable** and **not fully optimised**, use at your own care! This README will also be reworked.
+> This is a WIP tool that is **not fully optimised**, use at your own care! This README will also be reworked.
 
 ### 👁️ Uncover the unseen
 
-Project Absence is an OSINT (Open Source Intelligence) tool designed to assist cybersecurity professionals, engineers, and system administrators in identifying publicly available information related to their digital infrastructure.
+Project Absence is a domain and server OSINT tool for system administrators and security engineers. It supports a wide range of modules - for example subdomains discovery, files discovery, DNS data, etc. - and its default capabilities can be extended via Lua scripting.
 
 To maintain an OSINT-only approach, the tool contacts each discovered domain or server only once, to extract information based on the returned content - valuable data that can help and lead to further discoveries.
-
-More features are in development.
 
 ## Getting Started
 
@@ -100,9 +98,6 @@ Use responsibly and lawfully. Project Absence is a tool designed to assist cyber
 By using this tool, you agree to comply with all applicable laws and abide by the [Terms of Use](./TERMS_OF_USE.md).
 
 ## Contributing
-
-> [!NOTE]
-> Contributions are more than welcome after the `v1.0.0` release which can be tracked [here](https://github.com/kkrypt0nn/project-absence/milestone/1).
 
 People may contribute by following the [Contributing Guidelines](https://github.com/kkrypt0nn/project-absence/blob/main/CONTRIBUTING.md) and the [Code of Conduct](https://github.com/kkrypt0nn/project-absence/blob/main/CODE_OF_CONDUCT.md)
 

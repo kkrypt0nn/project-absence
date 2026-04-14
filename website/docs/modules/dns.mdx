@@ -1,15 +1,13 @@
 ---
 title: DNS
-description: This module gets data about the DNS entries of the domain, and flags certain keywords as interesting
+description: This module gets data about the DNS entries of the domain, and flags certain keywords as interesting.
 ---
 
-This module gets data about the DNS entries of the domain, and flags certain keywords as interesting
+This module gets data about the DNS entries of the domain, and flags certain keywords as interesting.
 
-It gathers the following DNS record types:
+The available parameters are:
 
-- A
-- AAAA
-- CAA
-- MX
-- SOA
-- TXT
+| Parameter              | Description                                       | Default                                    |
+| ---------------------- | ------------------------------------------------- | ------------------------------------------ |
+| `record_types`         | The type of DNS records to request for.           | `["a", "aaaa", "caa", "mx", "soa", "txt"]` |
+| `interesting_keywords` | The interesting keywords per record type to flag. | `mx = ["protonmail.ch"]`                   |

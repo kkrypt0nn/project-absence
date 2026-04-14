@@ -60,6 +60,15 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
 
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@4dd30955cca228da305ffee6fbc3fc1f95d447c2 # v3
+        with:
+          tag_name: ${{ inputs.version }}
+          name: Release ${{ inputs.version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install dependencies for clipboard crate
         run: sudo apt-get install -y libxcb1-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
 

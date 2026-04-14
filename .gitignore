@@ -16,4 +16,5 @@ Cargo.lock
 # RustRover files
 .idea/
 
+# macOS
 .DS_Store

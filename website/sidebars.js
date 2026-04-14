@@ -29,6 +29,7 @@ const sidebars = {
           items: [
             "modules/discovery/emails",
             "modules/discovery/endpoints",
+            "modules/discovery/files",
             "modules/discovery/subdomains",
           ],
         },
