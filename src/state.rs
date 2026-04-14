@@ -22,6 +22,7 @@ pub struct State {
     discovered_domains: Mutex<Vec<String>>,
     discovered_endpoints: Mutex<Vec<String>>,
     discovered_emails: Mutex<Vec<String>>,
+    discovered_files: Mutex<Vec<String>>,
 }
 
 impl State {
@@ -36,6 +37,7 @@ impl State {
             discovered_domains: Mutex::new(Vec::new()),
             discovered_endpoints: Mutex::new(Vec::new()),
             discovered_emails: Mutex::new(Vec::new()),
+            discovered_files: Mutex::new(Vec::new()),
         }
     }
 
@@ -119,5 +121,13 @@ impl State {
 
     pub fn has_discovered_email(&self, email: String) -> bool {
         self.discovered_emails.lock().unwrap().contains(&email)
+    }
+
+    pub fn discover_file(&self, file: String) {
+        self.discovered_files.lock().unwrap().push(file)
+    }
+
+    pub fn has_discovered_file(&self, file: String) -> bool {
+        self.discovered_files.lock().unwrap().contains(&file)
     }
 }

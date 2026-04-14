@@ -296,6 +296,23 @@ impl Session {
         {
             self.register_module(modules::technologies::ModuleTechnologies::new());
         }
+
+        if let Some(files_cfg) = &self.config.files {
+            let enabled_runners = files_cfg.enabled_runners.as_deref().unwrap_or(&[]);
+            let mut runners: Vec<Box<dyn Module>> = Vec::new();
+
+            add_runner!(
+                enabled_runners,
+                runners,
+                "dork",
+                &files_cfg.dork,
+                modules::discovery::files::dork::Runner::new
+            );
+
+            if !runners.is_empty() {
+                self.register_module(modules::discovery::files::FileDiscoveryModule::new(runners));
+            }
+        }
     }
 
     pub fn run(self: &Arc<Self>) -> Result<(), Error> {

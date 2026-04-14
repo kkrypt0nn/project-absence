@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     logger,
-    modules::discovery::{emails, endpoints, subdomains},
+    modules::discovery::{emails, endpoints, files, subdomains},
 };
 
 const DEFAULT_CONFIG: &str = r#"[domain_takeover]
@@ -21,13 +21,20 @@ mx = ["protonmail.ch"]
 enabled_runners = ["dork"]
 
 [emails.dork]
-search_engine = "ecosia"
+search_engine = "brave"
 
 [endpoints]
 enabled_runners = ["wayback_machine"]
 
 [endpoints.wayback_machine]
 timeout = 30
+
+[files]
+enabled_runners = ["dork"]
+
+[files.dork]
+search_engine = "brave"
+file_types = ["pdf", "txt"]
 
 [infrastructure]
 enabled = true
@@ -36,7 +43,7 @@ enabled = true
 enabled_runners = ["dork", "crtsh"]
 
 [subdomains.dork]
-search_engine = "ecosia"
+search_engine = "brave"
 
 [subdomains.crtsh]
 ignore_expired = false
@@ -76,6 +83,7 @@ pub struct Config {
     pub dns: Option<DnsConfig>,
     pub endpoints: Option<EndpointsConfig>,
     pub emails: Option<EmailsConfig>,
+    pub files: Option<FilesConfig>,
     pub infrastructure: Option<InfrastructureConfig>,
     pub subdomains: Option<SubdomainsConfig>,
     pub technologies: Option<TechnologiesConfig>,
@@ -121,6 +129,22 @@ pub struct EmailsConfig {
 pub struct EmailsDorkConfig {
     /// The search engine to use
     pub search_engine: Option<emails::dork::SearchEngine>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct FilesConfig {
+    /// List of enabled runners
+    pub enabled_runners: Option<Vec<files::Runners>>,
+    // Configuration for the dork runner
+    pub dork: Option<FilesDorkConfig>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct FilesDorkConfig {
+    /// The search engine to use
+    pub search_engine: Option<files::dork::SearchEngine>,
+    /// The file types to search for
+    pub file_types: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

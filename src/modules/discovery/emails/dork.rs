@@ -17,6 +17,7 @@ use crate::{config, logger};
 #[serde(rename_all = "lowercase")]
 pub enum SearchEngine {
     #[default]
+    Brave,
     Ecosia,
     Google,
 }
@@ -24,6 +25,9 @@ pub enum SearchEngine {
 impl fmt::Display for SearchEngine {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            SearchEngine::Brave => {
+                write!(formatter, "brave")
+            }
             SearchEngine::Ecosia => {
                 write!(formatter, "ecosia")
             }
@@ -43,6 +47,10 @@ impl Runner {
     pub fn new(config: config::EmailsDorkConfig) -> Self {
         Runner {
             base_urls: HashMap::from([
+                (
+                    SearchEngine::Brave,
+                    String::from("https://search.brave.com/search?q={{QUERY}}"),
+                ),
                 (
                     SearchEngine::Ecosia,
                     String::from("https://www.ecosia.org/search?method=index&q={{QUERY}}"),

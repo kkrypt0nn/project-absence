@@ -11,6 +11,7 @@ pub enum Type {
     // Maybe this one will be renamed to WaybackMachineEndpoint or add a flag?
     Endpoint,
     Email,
+    File,
 }
 
 impl fmt::Display for Type {
@@ -24,6 +25,9 @@ impl fmt::Display for Type {
             }
             Type::Email => {
                 write!(formatter, "email")
+            }
+            Type::File => {
+                write!(formatter, "file")
             }
         }
     }
