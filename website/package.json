@@ -28,7 +28,7 @@
     "@xyflow/react": "12.10.2",
     "clsx": "2.1.1",
     "dagre": "0.8.5",
-    "prettier": "3.8.2",
+    "prettier": "3.8.3",
     "prism-react-renderer": "2.4.1",
     "react": "19.2.5",
     "react-dom": "19.2.5",
@@ -38,7 +38,7 @@
     "@docusaurus/module-type-aliases": "3.10.0",
     "@docusaurus/tsconfig": "3.10.0",
     "prettier-plugin-organize-imports": "4.3.0",
-    "typescript": "6.0.2"
+    "typescript": "6.0.3"
   },
   "browserslist": {
     "production": [
@@ -53,6 +53,6 @@
     ]
   },
   "engines": {
-    "node": "24.14.1"
+    "node": "24.15.0"
   }
 }
