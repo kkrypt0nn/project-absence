@@ -218,13 +218,11 @@ impl Session {
                 runners,
                 "wayback_machine",
                 &endpoints_cfg.wayback_machine,
-                modules::discovery::endpoints::wayback_machine::Runner::new
+                modules::endpoints::wayback_machine::Runner::new
             );
 
             if !runners.is_empty() {
-                self.register_module(modules::discovery::endpoints::EndpointDiscoveryModule::new(
-                    runners,
-                ));
+                self.register_module(modules::endpoints::EndpointDiscoveryModule::new(runners));
             }
         }
 
@@ -243,13 +241,11 @@ impl Session {
                 runners,
                 "dork",
                 &emails_cfg.dork,
-                modules::discovery::emails::dork::Runner::new
+                modules::emails::dork::Runner::new
             );
 
             if !runners.is_empty() {
-                self.register_module(modules::discovery::emails::EmailDiscoveryModule::new(
-                    runners,
-                ));
+                self.register_module(modules::emails::EmailDiscoveryModule::new(runners));
             }
         }
 
@@ -262,20 +258,18 @@ impl Session {
                 runners,
                 "dork",
                 &subdomains_cfg.dork,
-                modules::discovery::subdomains::dork::Runner::new
+                modules::subdomains::dork::Runner::new
             );
             add_runner!(
                 enabled_runners,
                 runners,
                 "crtsh",
                 &subdomains_cfg.crtsh,
-                modules::discovery::subdomains::crtsh::Runner::new
+                modules::subdomains::crtsh::Runner::new
             );
 
             if !runners.is_empty() {
-                self.register_module(
-                    modules::discovery::subdomains::SubdomainDiscoveryModule::new(runners),
-                );
+                self.register_module(modules::subdomains::SubdomainDiscoveryModule::new(runners));
             }
         }
 
@@ -306,11 +300,11 @@ impl Session {
                 runners,
                 "dork",
                 &files_cfg.dork,
-                modules::discovery::files::dork::Runner::new
+                modules::files::dork::Runner::new
             );
 
             if !runners.is_empty() {
-                self.register_module(modules::discovery::files::FileDiscoveryModule::new(runners));
+                self.register_module(modules::files::FileDiscoveryModule::new(runners));
             }
         }
     }

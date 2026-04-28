@@ -99,7 +99,7 @@ const config = {
       },
       announcementBar: {
         content:
-          "⚠️ Project Absence is currently in <b>alpha version</b> and under ongoing development, meaning it may not be stable. This website is a work in progress as well!",
+          "⚠️ Project Absence is a WIP tool that may <b>not fully optimised</b>, use at your own care! This website is a work in progress as well!",
         backgroundColor: "var(--ifm-navbar-background-color)",
         textColor: "var(--ifm-font-color-base)",
         isCloseable: true,

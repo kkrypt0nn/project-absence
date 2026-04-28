@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     logger,
-    modules::discovery::{emails, endpoints, files, subdomains},
+    modules::{emails, endpoints, files, subdomains},
 };
 
 const DEFAULT_CONFIG: &str = r#"[domain_takeover]

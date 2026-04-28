@@ -16,7 +16,7 @@
 ---
 
 > [!CAUTION]
-> This is a WIP tool that is **not fully optimised**, use at your own care! This README will also be reworked.
+> This is a WIP tool that may **not fully optimised**, use at your own care! This README will also be reworked.
 
 ### 👁️ Uncover the unseen
 
