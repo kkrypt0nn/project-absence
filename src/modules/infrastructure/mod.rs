@@ -36,7 +36,10 @@ impl ModuleInfrastructure {
                         "header:x-azure-region",
                     ],
                 ),
-                ("google", vec!["header:traceparent", "header:x-cloud-trace-context"]),
+                (
+                    "google",
+                    vec!["header:traceparent", "header:x-cloud-trace-context"],
+                ),
                 ("heroku", vec!["server:heroku", "via:heroku-router"]),
                 (
                     "vercel",
