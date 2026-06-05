@@ -25,13 +25,13 @@
     "@fortawesome/free-solid-svg-icons": "7.2.0",
     "@fortawesome/react-fontawesome": "3.3.1",
     "@mdx-js/react": "3.1.1",
-    "@xyflow/react": "12.10.2",
+    "@xyflow/react": "12.11.0",
     "clsx": "2.1.1",
     "dagre": "0.8.5",
     "prettier": "3.8.3",
     "prism-react-renderer": "2.4.1",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "react-modal": "3.16.3"
   },
   "devDependencies": {
