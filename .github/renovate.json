@@ -8,6 +8,7 @@
   ],
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
+  "minimumReleaseAge": "7 days",
   "rangeStrategy": "pin",
   "rebaseWhen": "conflicted",
   "schedule": ["on friday and saturday"]
