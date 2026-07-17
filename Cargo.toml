@@ -28,7 +28,7 @@ human_bytes = "=0.4.3"
 memory-stats = "=1.2.0"
 mlua = { version = "=0.12.0", features = ["lua54", "send", "vendored"] }
 rand = "=0.10.2"
-regex = "=1.12.4"
+regex = "=1.13.0"
 reqwest = { version = "=0.13.4", features = ["blocking", "json"] }
 serde = { version = "=1.0.228", features = ["derive"] }
 serde_json = "=1.0.150"
