@@ -20,9 +20,9 @@ clipboard = ["dep:arboard"]
 
 [dependencies]
 arboard = { version = "=3.6.1", optional = true }
-base64 = "=0.23.0"
+base64 = "=0.23.1"
 chrono = "=0.4.45"
-clap = { version = "=4.6.5", features = ["derive"] }
+clap = { version = "=4.6.6", features = ["derive"] }
 domain = { version = "=0.12.2", features = ["resolv-sync"] }
 human_bytes = "=0.4.3"
 memory-stats = "=1.2.0"
