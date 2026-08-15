@@ -134,7 +134,7 @@ impl Module for Runner {
                 Ok(())
             }
             Err(_) => Err(
-                "Failed performing a request to crt.sh, likely a timeout; is it down?".to_string(),
+                "Failed to perform a request to crt.sh, likely a timeout; is it down?".to_string(),
             ),
         }
     }

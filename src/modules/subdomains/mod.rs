@@ -4,12 +4,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::{event_bus::Event, modules::Module, session::Session};
 
+pub mod crtname;
 pub mod crtsh;
 pub mod dork;
 
 #[derive(Copy, Clone, Debug, Deserialize, PartialEq, Eq, PartialOrd, Ord, Serialize, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum Runners {
+    Crtname,
     Crtsh,
     Dork,
 }
@@ -17,6 +19,9 @@ pub enum Runners {
 impl fmt::Display for Runners {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Runners::Crtname => {
+                write!(formatter, "crtname")
+            }
             Runners::Crtsh => {
                 write!(formatter, "crtsh")
             }

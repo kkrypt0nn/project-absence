@@ -256,9 +256,9 @@ impl Session {
             add_runner!(
                 enabled_runners,
                 runners,
-                "dork",
-                &subdomains_cfg.dork,
-                modules::subdomains::dork::Runner::new
+                "crtname",
+                &subdomains_cfg.crtname,
+                modules::subdomains::crtname::Runner::new
             );
             add_runner!(
                 enabled_runners,
@@ -266,6 +266,13 @@ impl Session {
                 "crtsh",
                 &subdomains_cfg.crtsh,
                 modules::subdomains::crtsh::Runner::new
+            );
+            add_runner!(
+                enabled_runners,
+                runners,
+                "dork",
+                &subdomains_cfg.dork,
+                modules::subdomains::dork::Runner::new
             );
 
             if !runners.is_empty() {

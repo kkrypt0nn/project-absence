@@ -5,13 +5,9 @@ description: This module will perform a passive discovery of new subdomains.
 
 This module will perform a passive discovery of new subdomains via multiple runners.
 
-## Dork Runner
+## crt.name Runner
 
-This runner will use a search engine and dorking techniques. The available parameters are:
-
-| Parameter       | Description                                                      | Default |
-| --------------- | ---------------------------------------------------------------- | ------- |
-| `search_engine` | The search engine to use. Can be: `brave`, `ecosia` or `google`. | `brave` |
+This runner will use crt.name.
 
 ## crt.sh Runner
 
@@ -21,3 +17,11 @@ This runner will use crt.sh. The available parameters are:
 | ---------------- | ----------------------------------------------------------------- | ------- |
 | `ignore_expired` | Ignore expired certificates.                                      | `false` |
 | `recent_only`    | Only care about the recently **(24 hours)** created certificates. | `false` |
+
+## Dork Runner
+
+This runner will use a search engine and dorking techniques. The available parameters are:
+
+| Parameter       | Description                                                      | Default |
+| --------------- | ---------------------------------------------------------------- | ------- |
+| `search_engine` | The search engine to use. Can be: `brave`, `ecosia` or `google`. | `brave` |

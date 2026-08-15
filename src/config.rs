@@ -40,7 +40,7 @@ file_types = ["pdf", "txt"]
 enabled = true
 
 [subdomains]
-enabled_runners = ["dork", "crtsh"]
+enabled_runners = ["dork", "crtname"]
 
 [subdomains.dork]
 search_engine = "brave"
@@ -169,6 +169,8 @@ pub struct SubdomainsConfig {
     pub dork: Option<SubdomainsDorkConfig>,
     // Configuration for the crt.sh runner
     pub crtsh: Option<SubdomainsCrtShConfig>,
+    // Configuration for the crt.name runner
+    pub crtname: Option<SubdomainsCrtNameConfig>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -184,6 +186,9 @@ pub struct SubdomainsCrtShConfig {
     /// Only care about the recently (24 hours) created certificates
     pub recent_only: Option<bool>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct SubdomainsCrtNameConfig {}
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct TechnologiesConfig {
