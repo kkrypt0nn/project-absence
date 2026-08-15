@@ -54,6 +54,8 @@ jobs:
             git commit -m "chore: Update version to ${VERSION_NO_V}"
             git push origin HEAD
           fi
+        env:
+          VERSION_NO_V: ${{ steps.version.outputs.version_no_v }}
 
       - name: Create and push tag
         run: |
