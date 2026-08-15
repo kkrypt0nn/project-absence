@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::database::node::Type;
 use crate::event_bus::Event;
@@ -51,7 +52,7 @@ impl Module for ModuleDomainTakeover {
         vec![String::from("domain:fetched")]
     }
 
-    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+    fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
         let fetched_data = match event {
             Event::DomainFetched(fetched_data) => fetched_data,
             _ => return Err("Received wrong event, exiting module".to_string()),

@@ -12,8 +12,8 @@ pub fn get_ip_addr(domain: &str) -> Option<IpAddr> {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GeoInfo {
-    city: Option<String>,
-    country: Option<String>,
+    pub(crate) city: Option<String>,
+    pub(crate) country: Option<String>,
 }
 
 impl From<GeoInfo> for serde_json::Value {

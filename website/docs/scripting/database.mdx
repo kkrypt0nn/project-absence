@@ -20,3 +20,11 @@ Adds metadata to an existing node.
 ```lua
 db:add_data("domain", "example.com", "hello_from", "lua_script")
 ```
+
+### `connect_new_node(parent_node_type: string, parent_node_name: string, type: string, name: string)`
+
+Connects a new node to an existing one
+
+```lua
+db:connect_new_node("domain", "example.com", "domain", "some.example.com")
+```

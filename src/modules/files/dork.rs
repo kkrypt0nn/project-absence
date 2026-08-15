@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fmt;
+use std::sync::Arc;
 
 use regex::Regex;
 use reqwest::header::USER_AGENT;
@@ -70,7 +71,7 @@ impl Runner {
 
     fn get_files(
         &self,
-        session: &Session,
+        session: Arc<Session>,
         domain: String,
         search_engine: SearchEngine,
     ) -> Result<Vec<String>, String> {
@@ -129,14 +130,14 @@ impl Module for Runner {
         vec![String::from("discovered:domain")]
     }
 
-    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+    fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
         let domain = match event {
             Event::DiscoveredDomain(domain) => domain,
             _ => return Err("Received wrong event, exiting module".to_string()),
         };
         let search_engine = self.config.search_engine.unwrap_or_default();
 
-        match self.get_files(session, domain.clone(), search_engine) {
+        match self.get_files(session.clone(), domain.clone(), search_engine) {
             Ok(files) => {
                 for file in files {
                     if !session.get_state().has_discovered_file(file.to_string()) {

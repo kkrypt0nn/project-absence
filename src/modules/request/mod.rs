@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, sync::Arc};
 
 use reqwest::{header::USER_AGENT, tls::TlsInfo};
 use x509_parser::parse_x509_certificate;
@@ -7,6 +7,7 @@ use crate::{
     event_bus::{self, Event},
     helpers, logger,
     modules::Module,
+    session::Session,
 };
 
 mod tls;
@@ -59,11 +60,7 @@ impl Module for ModuleRequest {
         vec![String::from("discovered:domain")]
     }
 
-    fn execute(
-        &self,
-        session: &crate::session::Session,
-        event: &crate::event_bus::Event,
-    ) -> Result<(), String> {
+    fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
         let domain = match event {
             Event::DiscoveredDomain(domain) => domain,
             _ => {

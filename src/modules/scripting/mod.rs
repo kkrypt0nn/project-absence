@@ -1,4 +1,5 @@
 use std::fs;
+use std::sync::Arc;
 
 use mlua::Function;
 
@@ -55,7 +56,7 @@ impl Module for Scripting {
             .unwrap_or_default()
     }
 
-    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+    fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
         if let Ok(execute_fn) = self.module.get::<mlua::Function>("execute")
             && let Err(e) = execute_fn.call::<bool>((
                 self.name(),

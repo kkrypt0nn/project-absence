@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::sync::Arc;
 use std::vec;
 
 use domain::base::{Name, Rtype};
@@ -47,7 +48,7 @@ impl Module for ModuleDns {
         vec![String::from("domain:fetched")]
     }
 
-    fn execute(&self, _session: &Session, event: &Event) -> Result<(), String> {
+    fn execute(&self, _session: Arc<Session>, event: &Event) -> Result<(), String> {
         let fetched_data = match event {
             Event::DomainFetched(fetched_data) => fetched_data,
             _ => return Err("Received wrong event, exiting module".to_string()),

@@ -131,7 +131,7 @@ impl Session {
             let domains_data = self.get_database().get_root().to_markdown();
             let content = format!(
                 "# Analysis Report for '{}'\n\n## Domains\n\n{}",
-                &self.get_args().domain,
+                self.get_args().domain,
                 domains_data
             );
             if file_result.write_all(content.as_bytes()).is_ok() {
@@ -183,7 +183,7 @@ impl Session {
                 }
 
                 thread::spawn(move || {
-                    if let Err(e) = module_clone.execute(&session, &event_clone) {
+                    if let Err(e) = module_clone.execute(Arc::clone(&session), &event_clone) {
                         logger::error(module_clone.name(), e);
                     }
 

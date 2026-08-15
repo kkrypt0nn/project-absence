@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use reqwest::StatusCode;
 use serde_json::Value;
 
@@ -34,7 +36,7 @@ impl Module for Runner {
         vec![String::from("discovered:domain")]
     }
 
-    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+    fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
         let domain = match event {
             Event::DiscoveredDomain(domain) => domain,
             _ => return Err("Received wrong event, exiting module".to_string()),

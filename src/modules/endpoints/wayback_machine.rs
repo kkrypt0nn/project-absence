@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::sync::Arc;
 use std::time::Duration;
 use std::vec;
 
@@ -34,7 +35,7 @@ impl Module for Runner {
         vec![String::from("discovered:domain")]
     }
 
-    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+    fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
         let domain = match event {
             Event::DiscoveredDomain(domain) => domain,
             _ => return Err("Received wrong event, exiting module".to_string()),
@@ -58,7 +59,7 @@ impl Module for Runner {
                 let text = response.text().unwrap_or_default();
                 let mut seen = HashSet::new();
                 let endpoints: Vec<&str> = text.lines().filter(|line| seen.insert(*line)).filter(|item| !session.get_state().has_discovered_endpoint(item.to_string())).collect();
-                logger::println(self.name(), format!("Discovered $[effect:bold]{}$[effect:reset] new endpoints for the '{}' domain on the Wayback Machine", endpoints.len(), &domain));
+                logger::println(self.name(), format!("Discovered $[effect:bold]{}$[effect:reset] new endpoints for the '{}' domain on the Wayback Machine", endpoints.len(), domain));
 
                 for endpoint in endpoints {
                     if let Some(parent) =

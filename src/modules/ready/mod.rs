@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::event_bus::Event;
 use crate::logger;
 use crate::modules::Module;
@@ -26,7 +28,7 @@ impl Module for ModuleReady {
         vec![String::from("ready")]
     }
 
-    fn execute(&self, _: &Session, _: &Event) -> Result<(), String> {
+    fn execute(&self, _: Arc<Session>, _: &Event) -> Result<(), String> {
         logger::println(
             self.name(),
             "Project Absence is now ready and will start doing its magic!",

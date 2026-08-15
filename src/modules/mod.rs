@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{event_bus::Event, session::Session};
 
 pub mod dns;
@@ -17,5 +19,5 @@ pub trait Module: Send + Sync {
     #[allow(dead_code)]
     fn description(&self) -> String;
     fn subscribers(&self) -> Vec<String>;
-    fn execute(&self, session: &Session, event: &Event) -> Result<(), String>;
+    fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String>;
 }

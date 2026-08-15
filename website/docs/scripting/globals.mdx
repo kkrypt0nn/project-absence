@@ -5,6 +5,36 @@ description: Built-in global objects available in Lua.
 
 The following globals are automatically registered.
 
+## `helpers`
+
+A global object for some helpers.
+
+### `helpers:get_ip_addr(domain: string) -> string`
+
+Resolves the IP address of a given domain.
+
+```lua
+local ip = helpers:get_ip_addr("example.com")
+```
+
+### `helpers:geolocate_ip(ip: string) -> { city: string, country: string }`
+
+Geolocates the given IP address with https://ip-api.com
+
+```lua
+local geo_info = helpers:geolocate_ip("1.1.1.1")
+local city = geo_info.city
+local country = geo_info.country
+```
+
+### `helpers:random_ua() -> string`
+
+Returns a random user agent.
+
+```lua
+local ua = helpers:random_ua()
+```
+
 ## `logger`
 
 A global logging object.

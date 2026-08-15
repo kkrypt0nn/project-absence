@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 
@@ -58,9 +58,9 @@ impl Module for SubdomainDiscoveryModule {
             .collect()
     }
 
-    fn execute(&self, session: &Session, event: &Event) -> Result<(), String> {
+    fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
         for runner in &self.runners {
-            runner.execute(session, event)?;
+            runner.execute(session.clone(), event)?;
         }
         Ok(())
     }

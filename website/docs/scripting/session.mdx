@@ -13,8 +13,24 @@ The session provides access to internal runtime state and the database.
 
 ## Available methods
 
-### `session:database() -> LuaDatabase`
+### `database() -> LuaDatabase`
 
 Returns a `LuaDatabase` object that allows you to modify existing nodes.
 
 See the [Database](database.mdx) page for all available methods.
+
+### `discover_domain(domain: string)`
+
+Publishes a new `discovered:domain` event.
+
+```lua
+session:discover_domain("example.com")
+```
+
+### `http_get(url: string, user_agent: string?) -> string`
+
+Makes a new HTTP GET request to the URL with the given user agent, or a random one if not set, and returns the response body.
+
+```lua
+local response = session:http_get("https://example.com")
+```
