@@ -5,7 +5,14 @@ use reqwest::header::USER_AGENT;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{database::node::{Node, Type}, event_bus::Event, modules::Module, session::Session, config, helpers, logger};
+use crate::{
+    config,
+    database::node::{Node, Type},
+    event_bus::Event,
+    helpers, logger,
+    modules::Module,
+    session::Session,
+};
 
 #[derive(
     Copy, Clone, Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord, Serialize, Hash,

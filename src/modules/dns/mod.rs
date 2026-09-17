@@ -1,9 +1,13 @@
 use std::{collections::HashMap, str::FromStr, sync::Arc};
 
-use domain::{base::{Name, Rtype}, rdata::AllRecordData, resolv::StubResolver};
+use domain::{
+    base::{Name, Rtype},
+    rdata::AllRecordData,
+    resolv::StubResolver,
+};
 use serde::Serialize;
 
-use crate::{event_bus::Event, modules::Module, session::Session, config, flags, logger};
+use crate::{config, event_bus::Event, flags, logger, modules::Module, session::Session};
 
 #[derive(Serialize)]
 struct DnsRecordEntry {

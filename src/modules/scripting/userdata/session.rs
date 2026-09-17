@@ -2,7 +2,7 @@ use mlua::{UserData, UserDataMethods};
 use reqwest::header::USER_AGENT;
 use std::sync::Arc;
 
-use crate::{event_bus::Event, session::Session, helpers};
+use crate::{event_bus::Event, helpers, session::Session};
 
 use super::database::LuaDatabase;
 
@@ -12,9 +12,7 @@ pub struct LuaSession {
 
 impl LuaSession {
     pub const fn new(session: Arc<Session>) -> Self {
-        Self {
-            session,
-        }
+        Self { session }
     }
 }
 

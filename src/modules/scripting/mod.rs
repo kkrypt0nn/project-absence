@@ -2,7 +2,12 @@ use std::{fs, sync::Arc};
 
 use mlua::Function;
 
-use crate::{event_bus::Event, modules::Module, modules::scripting::userdata::{event::LuaEvent, session::LuaSession}, session::Session};
+use crate::{
+    event_bus::Event,
+    modules::Module,
+    modules::scripting::userdata::{event::LuaEvent, session::LuaSession},
+    session::Session,
+};
 
 mod globals;
 mod userdata;
@@ -38,9 +43,7 @@ impl Module for Scripting {
             .get::<Function>("description")
             .unwrap()
             .call::<String>("")
-            .unwrap_or_else(|_| String::from(
-                "This module is responsible to execute a Lua script.",
-            ))
+            .unwrap_or_else(|_| String::from("This module is responsible to execute a Lua script."))
     }
 
     fn subscribers(&self) -> Vec<String> {

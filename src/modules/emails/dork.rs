@@ -4,7 +4,14 @@ use regex::Regex;
 use reqwest::header::USER_AGENT;
 use serde::{Deserialize, Serialize};
 
-use crate::{database::node::{Node, Type}, event_bus::Event, modules::Module, session::Session, config, logger};
+use crate::{
+    config,
+    database::node::{Node, Type},
+    event_bus::Event,
+    logger,
+    modules::Module,
+    session::Session,
+};
 
 #[derive(
     Copy, Clone, Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord, Serialize, Hash,

@@ -7,7 +7,14 @@ use serde_json::Value;
 
 use reqwest::header::USER_AGENT;
 
-use crate::{database::node::{Node, Type}, event_bus::Event, modules::Module, session::Session, config, flags, helpers, logger};
+use crate::{
+    config,
+    database::node::{Node, Type},
+    event_bus::Event,
+    flags, helpers, logger,
+    modules::Module,
+    session::Session,
+};
 
 pub struct Runner {
     config: config::SubdomainsCrtShConfig,
@@ -33,7 +40,7 @@ impl Module for Runner {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let  Event::DiscoveredDomain(domain) = event else {
+        let Event::DiscoveredDomain(domain) = event else {
             return Err("Received wrong event, exiting module".to_string());
         };
 

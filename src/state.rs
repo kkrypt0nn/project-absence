@@ -1,7 +1,10 @@
 use std::{
     sync::{
-        Arc, RwLock, atomic::{AtomicUsize, Ordering},
-    }, thread::sleep, time::Duration,
+        Arc, RwLock,
+        atomic::{AtomicUsize, Ordering},
+    },
+    thread::sleep,
+    time::Duration,
 };
 
 use human_bytes::human_bytes;
@@ -9,7 +12,6 @@ use memory_stats::memory_stats;
 use simple_semaphore::Permit;
 
 use crate::logger;
-
 
 pub struct State {
     active_tasks: AtomicUsize,

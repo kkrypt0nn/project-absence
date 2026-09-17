@@ -1,9 +1,22 @@
-use std::{env, fs::{File, create_dir_all}, io::{Error, Write}, path::PathBuf, sync::{Arc, Mutex, MutexGuard}, thread};
+use std::{
+    env,
+    fs::{File, create_dir_all},
+    io::{Error, Write},
+    path::PathBuf,
+    sync::{Arc, Mutex, MutexGuard},
+    thread,
+};
 
 use reqwest::blocking::{Client, ClientBuilder};
 use simple_semaphore::Semaphore;
 
-use crate::{event_bus::{self, EventBus}, modules::Module, args, config, database, debug, logger, modules, state};
+use crate::{
+    args, config, database, debug,
+    event_bus::{self, EventBus},
+    logger, modules,
+    modules::Module,
+    state,
+};
 
 macro_rules! add_runner {
     ($enabled_runners:expr, $runners_vec:expr, $name:expr, $cfg:expr, $constructor:path) => {
@@ -32,9 +45,10 @@ impl Session {
             args,
             bus: EventBus::default(),
             config,
-            database: Mutex::new(database::Database::new(
-                database::node::Node::new(database::node::Type::Domain, domain_clone),
-            )),
+            database: Mutex::new(database::Database::new(database::node::Node::new(
+                database::node::Type::Domain,
+                domain_clone,
+            ))),
             state: state::State::new(is_verbose, is_debug),
             http_client: ClientBuilder::new()
                 .tls_info(true)
@@ -239,7 +253,10 @@ impl Session {
         }
 
         if let Some(subdomains_cfg) = &self.config.subdomains {
-            let enabled_runners = subdomains_cfg.enabled_runners.as_deref().unwrap_or_default();
+            let enabled_runners = subdomains_cfg
+                .enabled_runners
+                .as_deref()
+                .unwrap_or_default();
             let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(

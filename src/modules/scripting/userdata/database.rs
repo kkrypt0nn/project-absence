@@ -2,7 +2,10 @@ use std::sync::Arc;
 
 use mlua::{UserData, UserDataMethods};
 
-use crate::{database::node::{Node, Type}, session::Session};
+use crate::{
+    database::node::{Node, Type},
+    session::Session,
+};
 
 pub struct LuaDatabase {
     session: Arc<Session>,

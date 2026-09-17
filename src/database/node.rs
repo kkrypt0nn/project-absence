@@ -1,4 +1,7 @@
-use std::{collections::HashMap, fmt::{self, Write}};
+use std::{
+    collections::HashMap,
+    fmt::{self, Write},
+};
 
 use serde::{Serialize, Serializer};
 use serde_json::Value;
@@ -155,7 +158,8 @@ impl Node {
     pub fn to_markdown(&self) -> String {
         let flags = if let Some(flags) = self.get_data("flags") {
             let mut result = String::from("#### Flags\n");
-            write!(&mut result,
+            write!(
+                &mut result,
                 "\n- `IS_RECENT` => {}\n- `HAS_EXPIRED` => {}\n- `POSSIBLE_TAKEOVER` => {}",
                 flags::contains_to_markdown(
                     flags.as_u64().unwrap() as usize,
@@ -179,7 +183,8 @@ impl Node {
                 } else {
                     "❌".to_string()
                 }
-            ).unwrap();
+            )
+            .unwrap();
             Some(result)
         } else {
             None
@@ -190,7 +195,8 @@ impl Node {
             if key == "flags" {
                 continue;
             }
-            write!(&mut data_markdown,
+            write!(
+                &mut data_markdown,
                 "#### {key}\n\n{}\n\n",
                 match value {
                     Value::Object(_) | Value::Array(_) => {
@@ -201,7 +207,8 @@ impl Node {
                     }
                     _ => value.to_string(),
                 }
-            ).unwrap();
+            )
+            .unwrap();
         }
 
         let connections_markdown = self

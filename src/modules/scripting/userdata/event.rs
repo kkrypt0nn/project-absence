@@ -8,9 +8,7 @@ pub struct LuaEvent {
 
 impl LuaEvent {
     pub const fn new(event: Event) -> Self {
-        Self {
-            event,
-        }
+        Self { event }
     }
 }
 
