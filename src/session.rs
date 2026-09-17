@@ -17,8 +17,8 @@ pub struct Session {
     args: args::Args,
     bus: EventBus,
     config: config::Config,
-    database: Arc<Mutex<database::Database>>,
-    state: Arc<state::State>,
+    database: Mutex<database::Database>,
+    state: state::State,
     http_client: Client,
     shutdown: Arc<Semaphore>,
 }
@@ -32,10 +32,10 @@ impl Session {
             args,
             bus: EventBus::default(),
             config,
-            database: Arc::new(Mutex::new(database::Database::new(
+            database: Mutex::new(database::Database::new(
                 database::node::Node::new(database::node::Type::Domain, domain_clone),
-            ))),
-            state: Arc::new(state::State::new(is_verbose, is_debug)),
+            )),
+            state: state::State::new(is_verbose, is_debug),
             http_client: ClientBuilder::new()
                 .tls_info(true)
                 .build()
@@ -52,12 +52,8 @@ impl Session {
         self.database.lock().unwrap()
     }
 
-    pub fn get_database_arc(&self) -> Arc<Mutex<database::Database>> {
-        Arc::clone(&self.database)
-    }
-
-    pub fn get_state(&self) -> Arc<state::State> {
-        Arc::clone(&self.state)
+    pub fn get_state(&self) -> &state::State {
+        &self.state
     }
 
     pub fn get_http_client(&self) -> &Client {
@@ -311,21 +307,21 @@ impl Session {
 
     pub fn run(self: &Arc<Self>) -> Result<(), Error> {
         let session = Arc::clone(self);
-        let state = session.get_state();
-        self.bus.subscribe("finished:task", move |_| {
-            state.decrement_tasks();
 
-            if state.is_debug_or_verbose() {
+        self.bus.subscribe("finished:task", move |_| {
+            session.state.decrement_tasks();
+
+            if session.state.is_debug_or_verbose() {
                 logger::debug(
                     "task",
                     format!(
                         "Task finished, tasks now are at {}",
-                        state.active_tasks_count()
+                        session.state.active_tasks_count()
                     ),
                 );
             }
 
-            if state.active_tasks_count() == 0 {
+            if session.state.active_tasks_count() == 0 {
                 if let Err(e) = session.output_results() {
                     logger::error("session", e.to_string());
                 }
@@ -336,9 +332,9 @@ impl Session {
 
         if self.get_state().is_debug_or_verbose() {
             thread::spawn({
-                let state_clone = Arc::clone(&self.get_state());
+                let session_clone = Arc::clone(self);
                 move || {
-                    state_clone.actively_report();
+                    session_clone.state.actively_report();
                 }
             });
         }

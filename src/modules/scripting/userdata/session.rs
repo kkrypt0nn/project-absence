@@ -1,20 +1,18 @@
 use mlua::{UserData, UserDataMethods};
 use reqwest::header::USER_AGENT;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
-use crate::{event_bus::Event, session::Session, database, helpers};
+use crate::{event_bus::Event, session::Session, helpers};
 
 use super::database::LuaDatabase;
 
 pub struct LuaSession {
     session: Arc<Session>,
-    database: Arc<Mutex<database::Database>>,
 }
 
 impl LuaSession {
     pub fn new(session: Arc<Session>) -> Self {
         Self {
-            database: Arc::clone(&session.get_database_arc()),
             session,
         }
     }
@@ -22,8 +20,8 @@ impl LuaSession {
 
 impl UserData for LuaSession {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("database", |_, this, ()| {
-            Ok(LuaDatabase::new(Arc::clone(&this.database)))
+        methods.add_method("database", |_, this: &LuaSession, ()| {
+            Ok(LuaDatabase::new(Arc::clone(&this.session)))
         });
 
         methods.add_method("discover_domain", |_, this, domain: String| {
