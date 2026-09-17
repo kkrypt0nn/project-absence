@@ -20,7 +20,7 @@ impl LuaSession {
 
 impl UserData for LuaSession {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("database", |_, this: &LuaSession, ()| {
+        methods.add_method("database", |_, this: &Self, ()| {
             Ok(LuaDatabase::new(Arc::clone(&this.session)))
         });
 

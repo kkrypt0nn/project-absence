@@ -28,7 +28,7 @@ impl Session {
         let domain_clone = args.clone().domain;
         let is_verbose = args.verbose;
         let is_debug = args.debug;
-        Arc::new(Session {
+        Arc::new(Self {
             args,
             bus: EventBus::default(),
             config,

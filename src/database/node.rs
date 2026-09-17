@@ -46,7 +46,7 @@ impl Serialize for Type {
 pub struct Node {
     r#type: Type,
     value: String,
-    connections: Vec<Node>,
+    connections: Vec<Self>,
     data: HashMap<String, Value>,
 }
 
@@ -73,13 +73,13 @@ impl Node {
         }
     }
 
-    pub fn connect(&mut self, node: Node) {
+    pub fn connect(&mut self, node: Self) {
         self.connections.push(node);
     }
 
     #[allow(unused)]
     pub fn add(&mut self, r#type: Type, value: String) {
-        self.connect(Node::new(r#type, value));
+        self.connect(Self::new(r#type, value));
     }
 
     pub fn add_data(&mut self, key: String, value: Value) {
@@ -116,11 +116,11 @@ impl Node {
             .expect("JSON object should exist")
     }
 
-    pub fn get_connections(&self) -> Vec<Node> {
+    pub fn get_connections(&self) -> Vec<Self> {
         self.connections.clone()
     }
 
-    pub fn find(&mut self, node: &Node) -> Option<&mut Node> {
+    pub fn find(&mut self, node: &Self) -> Option<&mut Self> {
         if self.equals(node) {
             return Some(self);
         }
@@ -136,7 +136,7 @@ impl Node {
         None
     }
 
-    pub fn equals(&self, other: &Node) -> bool {
+    pub fn equals(&self, other: &Self) -> bool {
         // Check type and value
         if self.r#type != other.r#type || self.value != other.value {
             return false;
