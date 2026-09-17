@@ -56,7 +56,7 @@ impl Module for ModuleDomainTakeover {
         let domain = &fetched_data.domain;
         let body = &fetched_data.response.body;
 
-        for (&platform, content) in self.platforms.iter() {
+        for (&platform, content) in &self.platforms {
             if body.contains(content) {
                 if let Some(parent) = session.get_database().search(Type::Domain, domain.clone()) {
                     parent.add_data(String::from("possible_takeover"), platform.into());
