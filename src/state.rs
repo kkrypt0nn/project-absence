@@ -13,6 +13,7 @@ use simple_semaphore::Permit;
 
 use crate::logger;
 
+
 pub struct State {
     active_tasks: Arc<AtomicUsize>,
     semaphore: Arc<simple_semaphore::Semaphore>,
@@ -34,10 +35,10 @@ impl State {
             verbose,
             debug,
 
-            discovered_domains: Mutex::new(Vec::new()),
-            discovered_endpoints: Mutex::new(Vec::new()),
-            discovered_emails: Mutex::new(Vec::new()),
-            discovered_files: Mutex::new(Vec::new()),
+            discovered_domains: Mutex::new(vec![]),
+            discovered_endpoints: Mutex::new(vec![]),
+            discovered_emails: Mutex::new(vec![]),
+            discovered_files: Mutex::new(vec![]),
         }
     }
 

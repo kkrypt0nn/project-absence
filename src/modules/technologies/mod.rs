@@ -54,7 +54,7 @@ impl Module for ModuleTechnologies {
         let domain = &fetched_data.domain;
         let body = &fetched_data.response.body;
 
-        let mut technologies_found: Vec<&str> = Vec::new();
+        let mut technologies_found: Vec<&str> = vec![];
         for (tech, keywords) in &self.signatures {
             if keywords.iter().any(|keyword| body.contains(keyword)) {
                 technologies_found.push(tech);

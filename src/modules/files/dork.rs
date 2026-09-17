@@ -75,7 +75,7 @@ impl Runner {
         domain: String,
         search_engine: SearchEngine,
     ) -> Result<Vec<String>, String> {
-        let mut results = Vec::new();
+        let mut results = vec![];
 
         for filetype in &self.config.file_types {
             let query = format!("filetype:{filetype} site:{domain}");

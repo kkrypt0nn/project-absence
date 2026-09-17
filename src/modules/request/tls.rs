@@ -34,7 +34,7 @@ impl TlsData {
                     _ => n.to_string(),
                 })
                 .collect(),
-            _ => Vec::new(),
+            _ => vec![],
         };
 
         Self {

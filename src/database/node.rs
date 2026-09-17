@@ -68,7 +68,7 @@ impl Node {
         Node {
             r#type,
             value,
-            connections: Vec::new(),
+            connections: vec![],
             data: HashMap::new(),
         }
     }
