@@ -96,7 +96,7 @@ impl Session {
 
         let home_dir = env::var("HOME")
             .or_else(|_| env::var("USERPROFILE"))
-            .unwrap_or_else(|_| String::from(""));
+            .unwrap_or_default();
         let result_path = &self.get_args().output;
         let expanded_result_path = if result_path.starts_with("~") {
             let mut expanded_path = result_path.clone();

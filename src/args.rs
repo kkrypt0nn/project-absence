@@ -55,7 +55,7 @@ impl Args {
     pub fn parse_config(&self) -> Result<Config, String> {
         let home_dir = env::var("HOME")
             .or_else(|_| env::var("USERPROFILE"))
-            .unwrap_or_else(|_| String::from(""));
+            .unwrap_or_default();
         let config_path = &self.config;
         let expanded_config_path = if config_path.starts_with("~") {
             let mut expanded_path = config_path.clone();

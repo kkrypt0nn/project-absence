@@ -56,7 +56,7 @@ enabled = true
 pub fn create_file_if_not_existing() {
     let home_dir = env::var("HOME")
         .or_else(|_| env::var("USERPROFILE"))
-        .unwrap_or_else(|_| String::from(""));
+        .unwrap_or_default();
     let path = PathBuf::from(format!("{home_dir}/.absence/config.toml"));
     if !path.exists()
         && let Some(parent) = path.parent()
