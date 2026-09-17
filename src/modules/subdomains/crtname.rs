@@ -49,14 +49,14 @@ impl Module for Runner {
 
         let response = session
             .get_http_client()
-            .get(format!("https://crt.name/v1/search?apex={}", domain))
+            .get(format!("https://crt.name/v1/search?apex={domain}"))
             .header(USER_AGENT, helpers::ua::get_random())
             .send();
         match response {
             Ok(response) => {
                 let status = response.status();
                 if status != StatusCode::OK {
-                    return Err(format!("crt.name returned status code {}", status));
+                    return Err(format!("crt.name returned status code {status}"));
                 }
 
                 let body = response
@@ -77,7 +77,7 @@ impl Module for Runner {
 
                     logger::println(
                         self.name(),
-                        format!("Discovered '{}' as a new subdomain", subdomain),
+                        format!("Discovered '{subdomain}' as a new subdomain"),
                     );
 
                     if let Some(parent) =

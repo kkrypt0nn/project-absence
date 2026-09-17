@@ -66,7 +66,7 @@ impl Runner {
     }
 
     fn name_with_search_engine(&self, search_engine: SearchEngine) -> String {
-        format!("{}({})", self.name(), search_engine)
+        format!("{}({search_engine})", self.name())
     }
 
     fn get_files(
@@ -78,7 +78,7 @@ impl Runner {
         let mut results = Vec::new();
 
         for filetype in &self.config.file_types {
-            let query = format!("filetype:{} site:{}", filetype, domain);
+            let query = format!("filetype:{filetype} site:{domain}");
             let uri = self
                 .base_urls
                 .get(&search_engine)
@@ -107,7 +107,7 @@ impl Runner {
                         .filter_map(|cap| cap.get(1).map(|m| m.as_str().to_string())),
                 );
             } else {
-                return Err(format!("Unable to reach {}", search_engine));
+                return Err(format!("Unable to reach {search_engine}"));
             }
         }
 
@@ -143,7 +143,7 @@ impl Module for Runner {
                     if !session.get_state().has_discovered_file(file.to_string()) {
                         logger::println(
                             self.name_with_search_engine(search_engine),
-                            format!("Discovered '{}' as a new file", file),
+                            format!("Discovered '{file}' as a new file"),
                         );
 
                         if let Some(parent) =

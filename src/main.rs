@@ -21,10 +21,8 @@ mod state;
 fn main() {
     config::create_file_if_not_existing();
     LOGGER.lock().unwrap().println(format!(
-        "Project Absence v{} $[fg:gray](built for {} on {})$[effect:reset]",
-        env!("CARGO_PKG_VERSION"),
-        OS,
-        ARCH
+        "Project Absence v{} $[fg:gray](built for {OS} on {ARCH})$[effect:reset]",
+        env!("CARGO_PKG_VERSION")
     ));
 
     let args = args::Args::parse();

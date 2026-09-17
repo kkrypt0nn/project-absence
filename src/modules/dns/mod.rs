@@ -29,7 +29,7 @@ impl ModuleDns {
     }
 
     fn name_with_record_type(&self, record_type: Rtype) -> String {
-        format!("{}({})", self.name(), record_type)
+        format!("{}({record_type})", self.name())
     }
 }
 
@@ -55,7 +55,7 @@ impl Module for ModuleDns {
         };
         let domain = &fetched_data.domain;
         let name =
-            Name::<Vec<u8>>::from_str(domain).map_err(|_| format!("Invalid domain: {}", domain))?;
+            Name::<Vec<u8>>::from_str(domain).map_err(|_| format!("Invalid domain: {domain}"))?;
 
         let mut dns_data: HashMap<String, Vec<DnsRecordEntry>> = HashMap::new();
 
@@ -63,7 +63,7 @@ impl Module for ModuleDns {
             let rtype = match Rtype::from_str(record_type) {
                 Ok(r) => r,
                 Err(_) => {
-                    logger::error(self.name(), format!("Invalid record type: {}", record_type));
+                    logger::error(self.name(), format!("Invalid record type: {record_type}"));
                     continue;
                 }
             };
@@ -77,7 +77,7 @@ impl Module for ModuleDns {
                 Err(e) => {
                     logger::error(
                         self.name_with_record_type(rtype),
-                        format!("Query failed: {}", e),
+                        format!("Query failed: {e}"),
                     );
                     continue;
                 }
@@ -100,7 +100,7 @@ impl Module for ModuleDns {
                             flags |= flags::dns::IS_INTERESTING;
                             logger::println(
                                 self.name_with_record_type(rtype),
-                                format!("[INTERESTING] {}", data),
+                                format!("[INTERESTING] {data}"),
                             );
                         }
                         dns_data
@@ -111,7 +111,7 @@ impl Module for ModuleDns {
                     Err(e) => {
                         logger::error(
                             self.name_with_record_type(rtype),
-                            format!("Failed to parse record: {}", e),
+                            format!("Failed to parse record: {e}"),
                         );
                     }
                 }
@@ -123,7 +123,7 @@ impl Module for ModuleDns {
             .search(crate::database::node::Type::Domain, domain.to_string())
         {
             parent.add_data("dns".to_string(), serde_json::to_value(dns_data).unwrap());
-            logger::println(self.name(), format!("Stored DNS data for {}", domain));
+            logger::println(self.name(), format!("Stored DNS data for {domain}"));
         }
 
         Ok(())

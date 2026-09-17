@@ -113,7 +113,7 @@ impl Module for ModuleInfrastructure {
                 .search(Type::Domain, domain.to_string())
             {
                 parent.add_data("tls".to_string(), serde_json::to_value(tls_data).unwrap());
-                logger::println(self.name(), format!("Gathered TLS data for {}", domain));
+                logger::println(self.name(), format!("Gathered TLS data for {domain}"));
             }
         }
 
@@ -162,15 +162,11 @@ impl Module for ModuleInfrastructure {
             logger::println(
                 self.name(),
                 format!(
-                    "Gathered interesting and security headers for {}{}",
-                    domain,
+                    "Gathered interesting and security headers for {domain}{}",
                     if let Some(cloud_provider) = cloud_provider {
-                        format!(
-                            ", as well as the potential cloud provider ({})",
-                            cloud_provider
-                        )
+                        format!(", as well as the potential cloud provider ({cloud_provider})")
                     } else {
-                        "".to_string()
+                        String::new()
                     }
                 ),
             );

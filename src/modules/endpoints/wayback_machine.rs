@@ -45,7 +45,7 @@ impl Module for Runner {
 
         let response = session
             .get_http_client()
-            .get(format!("https://web.archive.org/cdx/search/cdx?url={}/*&output=txt&collapse=urlkey&fl=original&page=/", domain))
+            .get(format!("https://web.archive.org/cdx/search/cdx?url={domain}/*&output=txt&collapse=urlkey&fl=original&page=/"))
             .header(USER_AGENT, helpers::ua::get_random())
             .timeout(Duration::from_secs(timeout_seconds))
             .send();
@@ -53,13 +53,13 @@ impl Module for Runner {
             Ok(response) => {
                 let status = response.status();
                 if status != StatusCode::OK {
-                    return Err(format!("Wayback Machine returned status code {}", status));
+                    return Err(format!("Wayback Machine returned status code {status}"));
                 }
 
                 let text = response.text().unwrap_or_default();
                 let mut seen = HashSet::new();
                 let endpoints: Vec<&str> = text.lines().filter(|line| seen.insert(*line)).filter(|item| !session.get_state().has_discovered_endpoint(item.to_string())).collect();
-                logger::println(self.name(), format!("Discovered $[effect:bold]{}$[effect:reset] new endpoints for the '{}' domain on the Wayback Machine", endpoints.len(), domain));
+                logger::println(self.name(), format!("Discovered $[effect:bold]{}$[effect:reset] new endpoints for the '{domain}' domain on the Wayback Machine", endpoints.len()));
 
                 for endpoint in endpoints {
                     if let Some(parent) =

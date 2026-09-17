@@ -66,7 +66,7 @@ impl Runner {
     }
 
     fn name_with_search_engine(&self, search_engine: SearchEngine) -> String {
-        format!("{}({})", self.name(), search_engine)
+        format!("{}({search_engine})", self.name())
     }
 
     fn get_emails(
@@ -79,7 +79,7 @@ impl Runner {
             .base_urls
             .get(&search_engine)
             .unwrap()
-            .replace("{{QUERY}}", format!("\"%40{}\"", domain).as_str());
+            .replace("{{QUERY}}", format!("\"%40{domain}\"").as_str());
         if let Ok(response) = session
             .get_http_client()
             .get(uri.clone())
@@ -102,7 +102,7 @@ impl Runner {
                 .filter_map(|cap| cap.get(0).map(|email| email.as_str().to_string()))
                 .collect::<Vec<String>>())
         } else {
-            Err(format!("Unable to reach {}", search_engine))
+            Err(format!("Unable to reach {search_engine}"))
         }
     }
 }
@@ -135,7 +135,7 @@ impl Module for Runner {
                     if !session.get_state().has_discovered_email(email.to_string()) {
                         logger::println(
                             self.name_with_search_engine(search_engine),
-                            format!("Discovered '{}' as a new email", email),
+                            format!("Discovered '{email}' as a new email"),
                         );
 
                         if let Some(parent) =

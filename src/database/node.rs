@@ -192,8 +192,7 @@ impl Node {
                 continue;
             }
             data_markdown.push_str(&format!(
-                "#### {}\n\n{}\n\n",
-                key,
+                "#### {key}\n\n{}\n\n",
                 match value {
                     Value::Object(_) | Value::Array(_) => {
                         format!(
@@ -236,7 +235,7 @@ impl Node {
             sections.push(data_markdown.trim().to_string());
         }
         if !endpoint_connections.is_empty() {
-            sections.push(format!("#### Endpoints\n{}", endpoint_connections));
+            sections.push(format!("#### Endpoints\n{endpoint_connections}"));
         }
         if !connections_markdown.is_empty() {
             sections.push(connections_markdown);

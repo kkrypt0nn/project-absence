@@ -11,6 +11,6 @@ fn render_nodes(nodes: Vec<Node>, prefix: &str) {
         let is_last = i == nodes.len() - 1;
         let arrow = if is_last { "└── " } else { "├── " };
         println!("{}{}{}", prefix, arrow, node);
-        render_nodes(node.get_connections(), format!("{}│   ", prefix).as_str());
+        render_nodes(node.get_connections(), format!("{prefix}│   ").as_str());
     }
 }

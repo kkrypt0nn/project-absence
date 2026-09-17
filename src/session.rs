@@ -107,7 +107,7 @@ impl Session {
         };
 
         // JSON Result
-        let json_result_path = PathBuf::from(format!("{}/results.json", expanded_result_path));
+        let json_result_path = PathBuf::from(format!("{expanded_result_path}/results.json"));
         if create_dir_all(json_result_path.parent().unwrap()).is_ok() {
             let mut file_result = File::create(json_result_path.clone())?;
             if file_result
@@ -125,14 +125,13 @@ impl Session {
         }
 
         // Markdown Result
-        let markdown_result_path = PathBuf::from(format!("{}/results.md", expanded_result_path));
+        let markdown_result_path = PathBuf::from(format!("{expanded_result_path}/results.md"));
         if create_dir_all(markdown_result_path.parent().unwrap()).is_ok() {
             let mut file_result = File::create(markdown_result_path.clone())?;
             let domains_data = self.get_database().get_root().to_markdown();
             let content = format!(
-                "# Analysis Report for '{}'\n\n## Domains\n\n{}",
-                self.get_args().domain,
-                domains_data
+                "# Analysis Report for '{}'\n\n## Domains\n\n{domains_data}",
+                self.get_args().domain
             );
             if file_result.write_all(content.as_bytes()).is_ok() {
                 logger::info(
@@ -175,9 +174,8 @@ impl Session {
                     logger::trace(
                         "bus:run",
                         format!(
-                            "Running module {} as the event {:?} has been emitted",
-                            module_clone.name(),
-                            e,
+                            "Running module {} as the event {e:?} has been emitted",
+                            module_clone.name()
                         ),
                     );
                 }

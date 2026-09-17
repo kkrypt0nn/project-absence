@@ -47,14 +47,14 @@ impl Module for Runner {
 
         let response = session
             .get_http_client()
-            .get(format!("https://crt.sh/?q={}&output=json", domain))
+            .get(format!("https://crt.sh/?q={domain}&output=json"))
             .header(USER_AGENT, helpers::ua::get_random())
             .send();
         match response {
             Ok(response) => {
                 let status = response.status();
                 if status != StatusCode::OK {
-                    return Err(format!("crt.sh returned status code {}", status));
+                    return Err(format!("crt.sh returned status code {status}"));
                 }
                 let items: Vec<CrtShItem> = response.json().unwrap_or_default();
                 for item in items {
@@ -96,8 +96,7 @@ impl Module for Runner {
                             logger::println(
                                 self.name(),
                                 format!(
-                                    "Discovered '{}' as a new subdomain{}{}",
-                                    name_value,
+                                    "Discovered '{name_value}' as a new subdomain{}{}",
                                     if has_expired {
                                         " $[fg:red]$[effect:bold](Certificate expired, likely inactive)"
                                     } else {

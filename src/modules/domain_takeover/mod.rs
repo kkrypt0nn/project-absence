@@ -33,7 +33,7 @@ impl ModuleDomainTakeover {
     }
 
     fn name_with_platform(&self, platform: &str) -> String {
-        format!("{}({})", self.name(), platform)
+        format!("{}({platform})", self.name())
     }
 }
 
@@ -68,7 +68,7 @@ impl Module for ModuleDomainTakeover {
                 }
                 logger::println(
                     self.name_with_platform(platform),
-                    format!("Domain takeover possible for '{}'", domain),
+                    format!("Domain takeover possible for '{domain}'"),
                 );
                 break;
             }

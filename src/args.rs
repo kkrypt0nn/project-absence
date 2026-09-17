@@ -65,11 +65,8 @@ impl Args {
             PathBuf::from(config_path)
         };
         let toml_content = fs::read_to_string(&expanded_config_path).map_err(|e| {
-            format!(
-                "Failed to read config file ({:?}): {}",
-                expanded_config_path, e
-            )
+            format!("Failed to read config file ({expanded_config_path:?}): {e}")
         })?;
-        toml::from_str(&toml_content).map_err(|e| format!("Failed to parse TOML config: {}", e))
+        toml::from_str(&toml_content).map_err(|e| format!("Failed to parse TOML config: {e}"))
     }
 }

@@ -72,14 +72,14 @@ impl Module for ModuleRequest {
             if session.get_state().is_debug_or_verbose() {
                 logger::debug(
                     self.name(),
-                    format!("Skipping already discovered domain: {}", domain),
+                    format!("Skipping already discovered domain: {domain}"),
                 );
             }
             return Ok(());
         }
         session.get_state().discover_domain(domain.clone());
 
-        let url = format!("https://{}", domain);
+        let url = format!("https://{domain}");
         let response = match session
             .get_http_client()
             .get(&url)
@@ -88,7 +88,7 @@ impl Module for ModuleRequest {
         {
             Ok(r) => r,
             Err(e) => {
-                logger::error(self.name(), format!("Failed to request {}: {}", domain, e));
+                logger::error(self.name(), format!("Failed to request {domain}: {e}"));
                 return Ok(());
             }
         };
