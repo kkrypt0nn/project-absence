@@ -7,8 +7,14 @@ pub struct ModuleDomainTakeover {
 }
 
 impl ModuleDomainTakeover {
-    pub fn new() -> Self {
-        ModuleDomainTakeover {
+    fn name_with_platform(&self, platform: &str) -> String {
+        format!("{}({platform})", self.name())
+    }
+}
+
+impl Default for ModuleDomainTakeover {
+    fn default() -> Self {
+        Self {
             platforms: HashMap::from([
                 (
                     "github",
@@ -25,10 +31,6 @@ impl ModuleDomainTakeover {
                 ("vercel", "The deployment could not be found on Vercel."),
             ]),
         }
-    }
-
-    fn name_with_platform(&self, platform: &str) -> String {
-        format!("{}({platform})", self.name())
     }
 }
 

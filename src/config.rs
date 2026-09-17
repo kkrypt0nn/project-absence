@@ -188,7 +188,7 @@ pub struct SubdomainsCrtShConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
-pub struct SubdomainsCrtNameConfig {}
+pub struct SubdomainsCrtNameConfig;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct TechnologiesConfig {

@@ -41,12 +41,6 @@ impl fmt::Debug for HttpResponse {
 
 pub struct ModuleRequest;
 
-impl ModuleRequest {
-    pub fn new() -> Self {
-        ModuleRequest
-    }
-}
-
 impl Module for ModuleRequest {
     fn name(&self) -> String {
         String::from("request")

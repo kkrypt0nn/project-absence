@@ -6,8 +6,8 @@ pub struct ModuleTechnologies {
     signatures: HashMap<&'static str, Vec<&'static str>>,
 }
 
-impl ModuleTechnologies {
-    pub fn new() -> Self {
+impl Default for ModuleTechnologies {
+    fn default() -> Self {
         let mut signatures: HashMap<&'static str, Vec<&'static str>> = HashMap::new();
 
         signatures.insert("astro", vec!["content=\"Astro v\"", "data-astro-cid-"]);
@@ -21,7 +21,7 @@ impl ModuleTechnologies {
             vec!["ng-version", "_ngcontent-ng-", "_nghost-ng-"],
         );
 
-        ModuleTechnologies { signatures }
+        Self { signatures }
     }
 }
 

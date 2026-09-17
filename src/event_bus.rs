@@ -44,18 +44,12 @@ impl fmt::Display for Event {
 
 type CallbackFn = Arc<dyn Fn(&Event) + Send + Sync>;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct EventBus {
     subscribers: Arc<RwLock<HashMap<String, Vec<CallbackFn>>>>,
 }
 
 impl EventBus {
-    pub fn new() -> EventBus {
-        EventBus {
-            subscribers: Arc::new(RwLock::new(HashMap::new())),
-        }
-    }
-
     pub fn subscribe<F>(&self, event_name: &str, callback: F)
     where
         F: Fn(&Event) + Send + Sync + 'static,

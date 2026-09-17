@@ -8,9 +8,9 @@ pub struct ModuleInfrastructure {
     security_headers: Vec<&'static str>,
 }
 
-impl ModuleInfrastructure {
-    pub fn new() -> Self {
-        ModuleInfrastructure {
+impl Default for ModuleInfrastructure {
+    fn default() -> Self {
+        Self {
             cloud_provider: HashMap::from([
                 (
                     "amazon",

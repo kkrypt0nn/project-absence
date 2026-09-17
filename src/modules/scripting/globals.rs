@@ -4,8 +4,8 @@ use mlua::{Lua, Result as LuaResult};
 pub fn register(lua: &Lua) -> LuaResult<()> {
     let globals = lua.globals();
 
-    globals.set("helpers", LuaHelpers::new())?;
-    globals.set("logger", LuaLogger::new())?;
+    globals.set("helpers", LuaHelpers)?;
+    globals.set("logger", LuaLogger)?;
 
     Ok(())
 }

@@ -29,7 +29,7 @@ impl Session {
         let is_debug = args.debug;
         Arc::new(Session {
             args,
-            bus: EventBus::new(),
+            bus: EventBus::default(),
             config,
             database: Arc::new(Mutex::new(database::Database::new(
                 database::node::Node::new(database::node::Type::Domain, domain_clone),
@@ -190,8 +190,8 @@ impl Session {
     // TODO: Include in the cleanup a way to prevent always having to do `config.clone()`, while also retaining a clean use of the config in the modules
     // TODO: Include in the cleanup a way to not have to add the runners manually? Maybe some register_runner macro for the module?
     pub fn register_config_modules(self: &Arc<Self>) {
-        self.register_module(modules::ready::ModuleReady::new());
-        self.register_module(modules::request::ModuleRequest::new());
+        self.register_module(modules::ready::ModuleReady);
+        self.register_module(modules::request::ModuleRequest);
 
         // Load Lua module
         // TODO: Allow multiple Lua modules in the future. For the current PoC, one is fine.
@@ -221,7 +221,7 @@ impl Session {
         if let Some(domain_takeover_cfg) = &self.config.domain_takeover
             && domain_takeover_cfg.enabled
         {
-            self.register_module(modules::domain_takeover::ModuleDomainTakeover::new());
+            self.register_module(modules::domain_takeover::ModuleDomainTakeover::default());
         }
 
         if let Some(emails_cfg) = &self.config.emails {
@@ -275,7 +275,7 @@ impl Session {
         if let Some(infrastructure_cfg) = &self.config.infrastructure
             && infrastructure_cfg.enabled
         {
-            self.register_module(modules::infrastructure::ModuleInfrastructure::new());
+            self.register_module(modules::infrastructure::ModuleInfrastructure::default());
         }
 
         if let Some(dns_cfg) = &self.config.dns
@@ -287,7 +287,7 @@ impl Session {
         if let Some(technologies_cfg) = &self.config.technologies
             && technologies_cfg.enabled
         {
-            self.register_module(modules::technologies::ModuleTechnologies::new());
+            self.register_module(modules::technologies::ModuleTechnologies::default());
         }
 
         if let Some(files_cfg) = &self.config.files {

@@ -2,13 +2,7 @@ use std::sync::Arc;
 
 use crate::{event_bus::Event, logger, modules::Module, session::Session};
 
-pub struct ModuleReady {}
-
-impl ModuleReady {
-    pub fn new() -> Self {
-        ModuleReady {}
-    }
-}
+pub struct ModuleReady;
 
 impl Module for ModuleReady {
     fn name(&self) -> String {
