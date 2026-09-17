@@ -57,7 +57,7 @@ impl Args {
             .or_else(|_| env::var("USERPROFILE"))
             .unwrap_or_default();
         let config_path = &self.config;
-        let expanded_config_path = if config_path.starts_with("~") {
+        let expanded_config_path = if config_path.starts_with('~') {
             let mut expanded_path = config_path.clone();
             expanded_path.replace_range(0..1, &home_dir);
             PathBuf::from(expanded_path)
