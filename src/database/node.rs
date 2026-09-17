@@ -17,16 +17,16 @@ pub enum Type {
 impl fmt::Display for Type {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Type::Domain => {
+            Self::Domain => {
                 write!(formatter, "domain")
             }
-            Type::Endpoint => {
+            Self::Endpoint => {
                 write!(formatter, "endpoint")
             }
-            Type::Email => {
+            Self::Email => {
                 write!(formatter, "email")
             }
-            Type::File => {
+            Self::File => {
                 write!(formatter, "file")
             }
         }
@@ -65,7 +65,7 @@ impl fmt::Display for Node {
 
 impl Node {
     pub fn new(r#type: Type, value: String) -> Self {
-        Node {
+        Self {
             r#type,
             value,
             connections: vec![],

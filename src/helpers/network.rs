@@ -18,7 +18,7 @@ pub struct GeoInfo {
 
 impl From<GeoInfo> for serde_json::Value {
     fn from(value: GeoInfo) -> Self {
-        serde_json::Value::Object(serde_json::Map::from_iter([
+        Self::Object(serde_json::Map::from_iter([
             (String::from("city"), value.city.into()),
             (String::from("country"), value.country.into()),
         ]))

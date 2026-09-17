@@ -10,7 +10,7 @@ pub struct Database {
 
 impl Database {
     pub fn new(root: Node) -> Self {
-        Database { root }
+        Self { root }
     }
 
     #[allow(dead_code)]

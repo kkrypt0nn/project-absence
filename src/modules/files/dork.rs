@@ -20,13 +20,13 @@ pub enum SearchEngine {
 impl fmt::Display for SearchEngine {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            SearchEngine::Brave => {
+            Self::Brave => {
                 write!(formatter, "brave")
             }
-            SearchEngine::Ecosia => {
+            Self::Ecosia => {
                 write!(formatter, "ecosia")
             }
-            SearchEngine::Google => {
+            Self::Google => {
                 write!(formatter, "google")
             }
         }
@@ -40,7 +40,7 @@ pub struct Runner {
 
 impl Runner {
     pub fn new(config: config::FilesDorkConfig) -> Self {
-        Runner {
+        Self {
             base_urls: HashMap::from([
                 (
                     SearchEngine::Brave,

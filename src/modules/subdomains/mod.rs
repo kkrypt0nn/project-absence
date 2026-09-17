@@ -19,13 +19,13 @@ pub enum Runners {
 impl fmt::Display for Runners {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Runners::Crtname => {
+            Self::Crtname => {
                 write!(formatter, "crtname")
             }
-            Runners::Crtsh => {
+            Self::Crtsh => {
                 write!(formatter, "crtsh")
             }
-            Runners::Dork => {
+            Self::Dork => {
                 write!(formatter, "dork")
             }
         }

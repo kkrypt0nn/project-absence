@@ -17,7 +17,7 @@ pub struct ModuleDns {
 
 impl ModuleDns {
     pub fn new(config: config::DnsConfig) -> Self {
-        ModuleDns { config }
+        Self { config }
     }
 
     fn name_with_record_type(&self, record_type: Rtype) -> String {

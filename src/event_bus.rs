@@ -28,16 +28,16 @@ pub enum Event {
 impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Event::Ready => {
+            Self::Ready => {
                 write!(f, "ready")
             }
-            Event::DiscoveredDomain(_) => {
+            Self::DiscoveredDomain(_) => {
                 write!(f, "discovered:domain")
             }
-            Event::DomainFetched(_) => {
+            Self::DomainFetched(_) => {
                 write!(f, "domain:fetched")
             }
-            Event::FinishedTask => write!(f, "finished:task"),
+            Self::FinishedTask => write!(f, "finished:task"),
         }
     }
 }

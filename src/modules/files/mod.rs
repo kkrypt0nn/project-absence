@@ -15,7 +15,7 @@ pub enum Runners {
 impl fmt::Display for Runners {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Runners::Dork => {
+            Self::Dork => {
                 write!(formatter, "dork")
             }
         }
