@@ -12,7 +12,7 @@ use crate::logger;
 
 
 pub struct State {
-    active_tasks: Arc<AtomicUsize>,
+    active_tasks: AtomicUsize,
     semaphore: Arc<simple_semaphore::Semaphore>,
     verbose: bool,
     debug: bool,
@@ -26,7 +26,7 @@ pub struct State {
 impl State {
     pub fn new(verbose: bool, debug: bool) -> Self {
         Self {
-            active_tasks: Arc::new(AtomicUsize::new(0)),
+            active_tasks: AtomicUsize::new(0),
             semaphore: simple_semaphore::Semaphore::new_available_parallelism()
                 .unwrap_or(simple_semaphore::Semaphore::new(8)),
             verbose,
