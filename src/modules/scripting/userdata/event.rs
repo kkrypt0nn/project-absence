@@ -7,9 +7,9 @@ pub struct LuaEvent {
 }
 
 impl LuaEvent {
-    pub fn new(event: &Event) -> Self {
+    pub const fn new(event: Event) -> Self {
         Self {
-            event: event.clone(),
+            event,
         }
     }
 }

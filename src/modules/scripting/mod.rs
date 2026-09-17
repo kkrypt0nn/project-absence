@@ -56,7 +56,7 @@ impl Module for Scripting {
             && let Err(e) = execute_fn.call::<bool>((
                 self.name(),
                 LuaSession::new(session),
-                LuaEvent::new(event),
+                LuaEvent::new(event.clone()),
             ))
         {
             return Err(e.to_string());

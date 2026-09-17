@@ -12,7 +12,7 @@ pub struct Runner {
 }
 
 impl Runner {
-    pub fn new(config: config::SubdomainsCrtNameConfig) -> Self {
+    pub const fn new(config: config::SubdomainsCrtNameConfig) -> Self {
         Self { _config: config }
     }
 }

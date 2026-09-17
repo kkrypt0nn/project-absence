@@ -14,7 +14,7 @@ pub struct Runner {
 }
 
 impl Runner {
-    pub fn new(config: config::SubdomainsCrtShConfig) -> Self {
+    pub const fn new(config: config::SubdomainsCrtShConfig) -> Self {
         Self { config }
     }
 }

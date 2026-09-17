@@ -44,7 +44,7 @@ impl Session {
         })
     }
 
-    pub fn get_args(&self) -> &args::Args {
+    pub const fn get_args(&self) -> &args::Args {
         &self.args
     }
 
@@ -52,11 +52,11 @@ impl Session {
         self.database.lock().unwrap()
     }
 
-    pub fn get_state(&self) -> &state::State {
+    pub const fn get_state(&self) -> &state::State {
         &self.state
     }
 
-    pub fn get_http_client(&self) -> &Client {
+    pub const fn get_http_client(&self) -> &Client {
         &self.http_client
     }
 

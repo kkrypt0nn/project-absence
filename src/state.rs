@@ -82,15 +82,15 @@ impl State {
         self.semaphore.acquire()
     }
 
-    pub fn is_debug(&self) -> bool {
+    pub const fn is_debug(&self) -> bool {
         self.debug
     }
 
-    pub fn is_verbose(&self) -> bool {
+    pub const fn is_verbose(&self) -> bool {
         self.verbose
     }
 
-    pub fn is_debug_or_verbose(&self) -> bool {
+    pub const fn is_debug_or_verbose(&self) -> bool {
         self.is_debug() || self.is_verbose()
     }
 

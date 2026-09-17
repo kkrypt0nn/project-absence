@@ -11,7 +11,7 @@ pub struct LuaSession {
 }
 
 impl LuaSession {
-    pub fn new(session: Arc<Session>) -> Self {
+    pub const fn new(session: Arc<Session>) -> Self {
         Self {
             session,
         }

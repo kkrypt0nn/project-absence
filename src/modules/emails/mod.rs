@@ -27,7 +27,7 @@ pub struct EmailDiscoveryModule {
 }
 
 impl EmailDiscoveryModule {
-    pub fn new(runners: Vec<Box<dyn Module>>) -> Self {
+    pub const fn new(runners: Vec<Box<dyn Module>>) -> Self {
         Self { runners }
     }
 }

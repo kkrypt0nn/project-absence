@@ -16,7 +16,7 @@ pub struct ModuleDns {
 }
 
 impl ModuleDns {
-    pub fn new(config: config::DnsConfig) -> Self {
+    pub const fn new(config: config::DnsConfig) -> Self {
         Self { config }
     }
 

@@ -9,7 +9,7 @@ pub struct Runner {
 }
 
 impl Runner {
-    pub fn new(config: config::EndpointsWaybackMachineConfig) -> Self {
+    pub const fn new(config: config::EndpointsWaybackMachineConfig) -> Self {
         Self { config }
     }
 }

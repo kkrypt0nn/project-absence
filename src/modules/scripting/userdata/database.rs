@@ -9,7 +9,7 @@ pub struct LuaDatabase {
 }
 
 impl LuaDatabase {
-    pub fn new(session: Arc<Session>) -> Self {
+    pub const fn new(session: Arc<Session>) -> Self {
         Self { session }
     }
 }

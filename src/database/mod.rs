@@ -9,7 +9,7 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn new(root: Node) -> Self {
+    pub const fn new(root: Node) -> Self {
         Self { root }
     }
 
