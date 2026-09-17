@@ -35,8 +35,8 @@ impl Default for ModuleDomainTakeover {
 }
 
 impl Module for ModuleDomainTakeover {
-    fn name(&self) -> String {
-        String::from("domain_takeover")
+    fn name(&self) -> &'static str {
+        "domain_takeover"
     }
 
     fn description(&self) -> String {

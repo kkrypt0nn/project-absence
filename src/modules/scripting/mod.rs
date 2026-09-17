@@ -29,8 +29,8 @@ impl Scripting {
 }
 
 impl Module for Scripting {
-    fn name(&self) -> String {
-        String::from("scripting")
+    fn name(&self) -> &'static str {
+        "scripting"
     }
 
     fn description(&self) -> String {

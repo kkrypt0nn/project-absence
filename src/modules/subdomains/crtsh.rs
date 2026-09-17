@@ -20,8 +20,8 @@ impl Runner {
 }
 
 impl Module for Runner {
-    fn name(&self) -> String {
-        String::from("discovery:subdomains:crtsh")
+    fn name(&self) -> &'static str {
+        "discovery:subdomains:crtsh"
     }
 
     fn description(&self) -> String {

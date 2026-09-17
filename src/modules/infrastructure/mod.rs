@@ -72,8 +72,8 @@ impl Default for ModuleInfrastructure {
 }
 
 impl Module for ModuleInfrastructure {
-    fn name(&self) -> String {
-        String::from("infrastructure")
+    fn name(&self) -> &'static str {
+        "infrastructure"
     }
 
     fn description(&self) -> String {

@@ -5,8 +5,8 @@ use crate::{event_bus::Event, logger, modules::Module, session::Session};
 pub struct ModuleReady;
 
 impl Module for ModuleReady {
-    fn name(&self) -> String {
-        String::from("ready")
+    fn name(&self) -> &'static str {
+        "ready"
     }
 
     fn description(&self) -> String {

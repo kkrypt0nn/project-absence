@@ -43,8 +43,8 @@ impl SubdomainDiscoveryModule {
 }
 
 impl Module for SubdomainDiscoveryModule {
-    fn name(&self) -> String {
-        String::from("discovery:subdomains")
+    fn name(&self) -> &'static str {
+        "discovery:subdomains"
     }
 
     fn description(&self) -> String {

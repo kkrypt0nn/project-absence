@@ -15,7 +15,7 @@ pub mod subdomains;
 pub mod technologies;
 
 pub trait Module: Send + Sync {
-    fn name(&self) -> String;
+    fn name(&self) -> &'static str;
     #[allow(dead_code)]
     fn description(&self) -> String;
     fn subscribers(&self) -> Vec<String>;

@@ -26,8 +26,8 @@ impl ModuleDns {
 }
 
 impl Module for ModuleDns {
-    fn name(&self) -> String {
-        String::from("dns")
+    fn name(&self) -> &'static str {
+        "dns"
     }
 
     fn description(&self) -> String {

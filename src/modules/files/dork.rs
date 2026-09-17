@@ -110,8 +110,8 @@ impl Runner {
 }
 
 impl Module for Runner {
-    fn name(&self) -> String {
-        String::from("discovery:files:dork")
+    fn name(&self) -> &'static str {
+        "discovery:files:dork"
     }
 
     fn description(&self) -> String {

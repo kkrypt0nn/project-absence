@@ -15,8 +15,8 @@ impl Runner {
 }
 
 impl Module for Runner {
-    fn name(&self) -> String {
-        String::from("discovery:endpoint:wayback_machine")
+    fn name(&self) -> &'static str {
+        "discovery:endpoint:wayback_machine"
     }
 
     fn description(&self) -> String {

@@ -33,8 +33,8 @@ impl EndpointDiscoveryModule {
 }
 
 impl Module for EndpointDiscoveryModule {
-    fn name(&self) -> String {
-        String::from("discovery:endpoint")
+    fn name(&self) -> &'static str {
+        "discovery:endpoint"
     }
 
     fn description(&self) -> String {

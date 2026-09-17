@@ -33,8 +33,8 @@ impl FileDiscoveryModule {
 }
 
 impl Module for FileDiscoveryModule {
-    fn name(&self) -> String {
-        String::from("discovery:files")
+    fn name(&self) -> &'static str {
+        "discovery:files"
     }
 
     fn description(&self) -> String {

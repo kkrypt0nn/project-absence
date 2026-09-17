@@ -33,8 +33,8 @@ impl EmailDiscoveryModule {
 }
 
 impl Module for EmailDiscoveryModule {
-    fn name(&self) -> String {
-        String::from("discovery:emails")
+    fn name(&self) -> &'static str {
+        "discovery:emails"
     }
 
     fn description(&self) -> String {

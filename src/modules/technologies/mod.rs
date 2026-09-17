@@ -26,8 +26,8 @@ impl Default for ModuleTechnologies {
 }
 
 impl Module for ModuleTechnologies {
-    fn name(&self) -> String {
-        String::from("technologies")
+    fn name(&self) -> &'static str {
+        "technologies"
     }
 
     fn description(&self) -> String {

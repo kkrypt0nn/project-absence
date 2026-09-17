@@ -42,8 +42,8 @@ impl fmt::Debug for HttpResponse {
 pub struct ModuleRequest;
 
 impl Module for ModuleRequest {
-    fn name(&self) -> String {
-        String::from("request")
+    fn name(&self) -> &'static str {
+        "request"
     }
 
     fn description(&self) -> String {
