@@ -14,7 +14,7 @@ impl Database {
     }
 
     #[allow(dead_code)]
-    pub fn get_root(&mut self) -> &mut Node {
+    pub const fn get_root(&mut self) -> &mut Node {
         &mut self.root
     }
 
