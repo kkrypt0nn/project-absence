@@ -77,7 +77,7 @@ impl Runner {
             .replace("{{QUERY}}", format!("site%3A{domain}").as_str());
         if let Ok(response) = session
             .get_http_client()
-            .get(uri.clone())
+            .get(uri)
             // https://github.com/benbusby/whoogle-search/issues/1211
             .header(
                 USER_AGENT,

@@ -18,7 +18,7 @@ impl Scripting {
         let script = fs::read_to_string(script_path).map_err(|e| e.to_string())?;
         let module: mlua::Table = lua.load(&script).eval().map_err(|e| e.to_string())?;
         let mluascript = Self { lua, module };
-        mluascript.setup_globals().map_err(|e| e.to_string())?;
+        mluascript.setup_globals()?;
         Ok(mluascript)
     }
 

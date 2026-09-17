@@ -17,7 +17,7 @@ fn create_database() {
 #[test]
 fn add_node() {
     let node = Node::new(Type::Domain, String::from("krypton.ninja"));
-    let mut database = Database::new(node.clone());
+    let mut database = Database::new(node);
     let get_node = database
         .search(Type::Domain, String::from("krypton.ninja"))
         .unwrap();
@@ -29,7 +29,7 @@ fn add_node() {
 #[test]
 fn add_node_to_root() {
     let node = Node::new(Type::Domain, String::from("krypton.ninja"));
-    let mut database = Database::new(node.clone());
+    let mut database = Database::new(node);
     let root_node = database.get_root();
     root_node.add(Type::Domain, String::from("go.krypton.ninja"));
     root_node.add(Type::Domain, String::from("status.krypton.ninja"));
@@ -48,7 +48,7 @@ fn add_node_data() {
 #[test]
 fn search_node() {
     let node = Node::new(Type::Domain, String::from("krypton.ninja"));
-    let mut database = Database::new(node.clone());
+    let mut database = Database::new(node);
     let root_node = database.get_root();
     root_node.add(Type::Domain, String::from("go.krypton.ninja"));
     root_node.add(Type::Domain, String::from("status.krypton.ninja"));
@@ -72,7 +72,7 @@ fn search_node() {
 #[test]
 fn search_node_root() {
     let node = Node::new(Type::Domain, String::from("krypton.ninja"));
-    let mut database = Database::new(node.clone());
+    let mut database = Database::new(node);
     assert!(
         database
             .search(Type::Domain, String::from("krypton.ninja"))
