@@ -208,7 +208,7 @@ impl Node {
             .get_connections()
             .iter()
             .filter(|conn| !matches!(conn.r#type, Type::Endpoint))
-            .map(|conn| conn.to_markdown())
+            .map(Self::to_markdown)
             .collect::<Vec<String>>()
             .join("\n\n");
 
