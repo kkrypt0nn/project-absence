@@ -28,9 +28,7 @@ impl UserData for LuaDatabase {
 
                 let mut db = this.session.get_database();
 
-                let node = if let Some(node_ref) = db.search(node_type, node_name) {
-                    node_ref
-                } else {
+                let Some(node) = db.search(node_type, node_name) else {
                     return Ok(());
                 };
 

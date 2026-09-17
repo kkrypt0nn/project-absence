@@ -50,9 +50,8 @@ impl Module for ModuleDomainTakeover {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let fetched_data = match event {
-            Event::DomainFetched(fetched_data) => fetched_data,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DomainFetched(fetched_data) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
         let domain = &fetched_data.domain;
         let body = &fetched_data.response.body;

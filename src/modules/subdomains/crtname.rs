@@ -33,9 +33,8 @@ impl Module for Runner {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let domain = match event {
-            Event::DiscoveredDomain(domain) => domain,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DiscoveredDomain(domain) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
 
         // Only apex allowed

@@ -41,9 +41,8 @@ impl Module for ModuleDns {
     }
 
     fn execute(&self, _session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let fetched_data = match event {
-            Event::DomainFetched(fetched_data) => fetched_data,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DomainFetched(fetched_data) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
         let domain = &fetched_data.domain;
         let name =
@@ -52,12 +51,9 @@ impl Module for ModuleDns {
         let mut dns_data: HashMap<String, Vec<DnsRecordEntry>> = HashMap::new();
 
         for record_type in &self.config.record_types {
-            let rtype = match Rtype::from_str(record_type) {
-                Ok(r) => r,
-                Err(_) => {
-                    logger::error(self.name(), format!("Invalid record type: {record_type}"));
-                    continue;
-                }
+            let Ok(rtype) = Rtype::from_str(record_type) else {
+                logger::error(self.name(), format!("Invalid record type: {record_type}"));
+                continue;
             };
 
             // Cloning a Vec<u8> is probably cheaper than parsing all the time (?)
