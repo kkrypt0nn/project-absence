@@ -87,7 +87,7 @@ impl Runner {
         {
             let html = response.text().unwrap_or_default();
             let re = Regex::new(&format!(
-                r#"\bhttps://([a-zA-Z0-9.-]+\.{})\b"#,
+                r"\bhttps://([a-zA-Z0-9.-]+\.{})\b",
                 regex::escape(&domain)
             ))
             .unwrap();
