@@ -1,10 +1,7 @@
 use std::{
     sync::{
-        Arc, Mutex,
-        atomic::{AtomicUsize, Ordering},
-    },
-    thread::sleep,
-    time::Duration,
+        Arc, RwLock, atomic::{AtomicUsize, Ordering},
+    }, thread::sleep, time::Duration,
 };
 
 use human_bytes::human_bytes;
@@ -20,10 +17,10 @@ pub struct State {
     verbose: bool,
     debug: bool,
 
-    discovered_domains: Mutex<Vec<String>>,
-    discovered_endpoints: Mutex<Vec<String>>,
-    discovered_emails: Mutex<Vec<String>>,
-    discovered_files: Mutex<Vec<String>>,
+    discovered_domains: RwLock<Vec<String>>,
+    discovered_endpoints: RwLock<Vec<String>>,
+    discovered_emails: RwLock<Vec<String>>,
+    discovered_files: RwLock<Vec<String>>,
 }
 
 impl State {
@@ -35,10 +32,10 @@ impl State {
             verbose,
             debug,
 
-            discovered_domains: Mutex::new(vec![]),
-            discovered_endpoints: Mutex::new(vec![]),
-            discovered_emails: Mutex::new(vec![]),
-            discovered_files: Mutex::new(vec![]),
+            discovered_domains: RwLock::new(vec![]),
+            discovered_endpoints: RwLock::new(vec![]),
+            discovered_emails: RwLock::new(vec![]),
+            discovered_files: RwLock::new(vec![]),
         }
     }
 
@@ -98,37 +95,37 @@ impl State {
     }
 
     pub fn discover_domain(&self, domain: String) {
-        self.discovered_domains.lock().unwrap().push(domain)
+        self.discovered_domains.write().unwrap().push(domain)
     }
 
     pub fn has_discovered_domain(&self, domain: String) -> bool {
-        self.discovered_domains.lock().unwrap().contains(&domain)
+        self.discovered_domains.read().unwrap().contains(&domain)
     }
 
     pub fn discover_endpoint(&self, endpoint: String) {
-        self.discovered_endpoints.lock().unwrap().push(endpoint)
+        self.discovered_endpoints.write().unwrap().push(endpoint)
     }
 
     pub fn has_discovered_endpoint(&self, endpoint: String) -> bool {
         self.discovered_endpoints
-            .lock()
+            .read()
             .unwrap()
             .contains(&endpoint)
     }
 
     pub fn discover_email(&self, email: String) {
-        self.discovered_emails.lock().unwrap().push(email)
+        self.discovered_emails.write().unwrap().push(email)
     }
 
     pub fn has_discovered_email(&self, email: String) -> bool {
-        self.discovered_emails.lock().unwrap().contains(&email)
+        self.discovered_emails.read().unwrap().contains(&email)
     }
 
     pub fn discover_file(&self, file: String) {
-        self.discovered_files.lock().unwrap().push(file)
+        self.discovered_files.write().unwrap().push(file)
     }
 
     pub fn has_discovered_file(&self, file: String) -> bool {
-        self.discovered_files.lock().unwrap().contains(&file)
+        self.discovered_files.read().unwrap().contains(&file)
     }
 }
