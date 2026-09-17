@@ -38,8 +38,8 @@ impl Module for Runner {
             _ => return Err("Received wrong event, exiting module".to_string()),
         };
 
-        let ignore_expired = self.config.ignore_expired.unwrap_or(false);
-        let recent_only = self.config.recent_only.unwrap_or(false);
+        let ignore_expired = self.config.ignore_expired.unwrap_or_default();
+        let recent_only = self.config.recent_only.unwrap_or_default();
 
         let response = session
             .get_http_client()

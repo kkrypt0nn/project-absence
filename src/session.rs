@@ -202,7 +202,7 @@ impl Session {
         }
 
         if let Some(endpoints_cfg) = &self.config.endpoints {
-            let enabled_runners = endpoints_cfg.enabled_runners.as_deref().unwrap_or(&[]);
+            let enabled_runners = endpoints_cfg.enabled_runners.as_deref().unwrap_or_default();
             let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(
@@ -225,7 +225,7 @@ impl Session {
         }
 
         if let Some(emails_cfg) = &self.config.emails {
-            let enabled_runners = emails_cfg.enabled_runners.as_deref().unwrap_or(&[]);
+            let enabled_runners = emails_cfg.enabled_runners.as_deref().unwrap_or_default();
             let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(
@@ -242,7 +242,7 @@ impl Session {
         }
 
         if let Some(subdomains_cfg) = &self.config.subdomains {
-            let enabled_runners = subdomains_cfg.enabled_runners.as_deref().unwrap_or(&[]);
+            let enabled_runners = subdomains_cfg.enabled_runners.as_deref().unwrap_or_default();
             let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(
@@ -291,7 +291,7 @@ impl Session {
         }
 
         if let Some(files_cfg) = &self.config.files {
-            let enabled_runners = files_cfg.enabled_runners.as_deref().unwrap_or(&[]);
+            let enabled_runners = files_cfg.enabled_runners.as_deref().unwrap_or_default();
             let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(
