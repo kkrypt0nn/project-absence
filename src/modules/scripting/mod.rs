@@ -1,13 +1,8 @@
-use std::fs;
-use std::sync::Arc;
+use std::{fs, sync::Arc};
 
 use mlua::Function;
 
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::modules::scripting::userdata::event::LuaEvent;
-use crate::modules::scripting::userdata::session::LuaSession;
-use crate::session::Session;
+use crate::{event_bus::Event, modules::Module, modules::scripting::userdata::{event::LuaEvent, session::LuaSession}, session::Session};
 
 mod globals;
 mod userdata;

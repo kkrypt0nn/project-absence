@@ -1,17 +1,11 @@
-use std::collections::HashMap;
-use std::fmt;
-use std::sync::Arc;
+use std::{collections::HashMap, fmt, sync::Arc};
 
 use regex::Regex;
 use reqwest::header::USER_AGENT;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::database::node::{Node, Type};
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, helpers, logger};
+use crate::{database::node::{Node, Type}, event_bus::Event, modules::Module, session::Session, config, helpers, logger};
 
 #[derive(
     Copy, Clone, Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord, Serialize, Hash,

@@ -2,9 +2,7 @@ use mlua::{UserData, UserDataMethods};
 use reqwest::header::USER_AGENT;
 use std::sync::{Arc, Mutex};
 
-use crate::event_bus::Event;
-use crate::session::Session;
-use crate::{database, helpers};
+use crate::{event_bus::Event, session::Session, database, helpers};
 
 use super::database::LuaDatabase;
 

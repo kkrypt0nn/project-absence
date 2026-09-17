@@ -1,17 +1,9 @@
-use std::collections::HashMap;
-use std::str::FromStr;
-use std::sync::Arc;
-use std::vec;
+use std::{collections::HashMap, str::FromStr, sync::Arc};
 
-use domain::base::{Name, Rtype};
-use domain::rdata::AllRecordData;
-use domain::resolv::StubResolver;
+use domain::{base::{Name, Rtype}, rdata::AllRecordData, resolv::StubResolver};
 use serde::Serialize;
 
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, flags, logger};
+use crate::{event_bus::Event, modules::Module, session::Session, config, flags, logger};
 
 #[derive(Serialize)]
 struct DnsRecordEntry {

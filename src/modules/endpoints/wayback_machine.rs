@@ -1,16 +1,8 @@
-use std::collections::HashSet;
-use std::sync::Arc;
-use std::time::Duration;
-use std::vec;
+use std::{collections::HashSet, sync::Arc, time::Duration};
 
-use reqwest::StatusCode;
-use reqwest::header::USER_AGENT;
+use reqwest::{StatusCode, header::USER_AGENT};
 
-use crate::database::node::{Node, Type};
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, helpers, logger};
+use crate::{database::node::{Node, Type}, event_bus::Event, modules::Module, session::Session, config, helpers, logger};
 
 pub struct Runner {
     config: config::EndpointsWaybackMachineConfig,

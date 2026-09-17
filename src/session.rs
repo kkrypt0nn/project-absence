@@ -1,14 +1,8 @@
-use std::fs::{File, create_dir_all};
-use std::io::{Error, Write};
-use std::path::PathBuf;
-use std::sync::{Arc, Condvar, Mutex, MutexGuard};
-use std::{env, thread};
+use std::{fs::{File, create_dir_all}, io::{Error, Write}, path::PathBuf, sync::{Arc, Condvar, Mutex, MutexGuard}, env, thread};
 
 use reqwest::blocking::{Client, ClientBuilder};
 
-use crate::event_bus::{self, EventBus};
-use crate::modules::Module;
-use crate::{args, config, database, debug, logger, modules, state};
+use crate::{event_bus::{self, EventBus}, modules::Module, args, config, database, debug, logger, modules, state};
 
 macro_rules! add_runner {
     ($enabled_runners:expr, $runners_vec:expr, $name:expr, $cfg:expr, $constructor:path) => {

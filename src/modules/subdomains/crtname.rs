@@ -5,11 +5,7 @@ use serde_json::Value;
 
 use reqwest::header::USER_AGENT;
 
-use crate::database::node::{Node, Type};
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, helpers, logger};
+use crate::{database::node::{Node, Type}, event_bus::Event, modules::Module, session::Session, config, helpers, logger};
 
 pub struct Runner {
     _config: config::SubdomainsCrtNameConfig,

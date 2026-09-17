@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use crate::event_bus::Event;
-use crate::logger;
-use crate::modules::Module;
-use crate::session::Session;
+use crate::{event_bus::Event, logger, modules::Module, session::Session};
 
 pub struct ModuleReady {}
 

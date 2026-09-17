@@ -1,11 +1,6 @@
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
-use crate::database::node::Type;
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{flags, logger};
+use crate::{database::node::Type, event_bus::Event, modules::Module, session::Session, flags, logger};
 
 pub struct ModuleDomainTakeover {
     platforms: HashMap<&'static str, &'static str>,

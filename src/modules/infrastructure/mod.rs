@@ -1,12 +1,6 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::vec;
+use std::{collections::HashMap, sync::Arc};
 
-use crate::database::node::Type;
-use crate::event_bus::Event;
-use crate::logger;
-use crate::modules::Module;
-use crate::session::Session;
+use crate::{database::node::Type, event_bus::Event, logger, modules::Module, session::Session};
 
 pub struct ModuleInfrastructure {
     cloud_provider: HashMap<&'static str, Vec<&'static str>>,
