@@ -32,7 +32,7 @@ impl UserData for LuaSession {
         methods.add_method(
             "http_get",
             |_, this, (url, user_agent): (String, Option<String>)| {
-                let ua = user_agent.unwrap_or(helpers::ua::get_random().to_string());
+                let ua = user_agent.unwrap_or_else(|| helpers::ua::get_random().to_string());
                 let response = this
                     .session
                     .get_http_client()

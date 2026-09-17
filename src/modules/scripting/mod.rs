@@ -38,7 +38,7 @@ impl Module for Scripting {
             .get::<Function>("description")
             .unwrap()
             .call::<String>("")
-            .unwrap_or(String::from(
+            .unwrap_or_else(|_| String::from(
                 "This module is responsible to execute a Lua script.",
             ))
     }

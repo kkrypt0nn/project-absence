@@ -28,7 +28,7 @@ impl State {
         Self {
             active_tasks: AtomicUsize::new(0),
             semaphore: simple_semaphore::Semaphore::new_available_parallelism()
-                .unwrap_or(simple_semaphore::Semaphore::new(8)),
+                .unwrap_or_else(|_| simple_semaphore::Semaphore::new(8)),
             verbose,
             debug,
 
