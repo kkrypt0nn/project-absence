@@ -1,6 +1,7 @@
-use std::{fs::{File, create_dir_all}, io::{Error, Write}, path::PathBuf, sync::{Arc, Condvar, Mutex, MutexGuard}, env, thread};
+use std::{env, fs::{File, create_dir_all}, io::{Error, Write}, path::PathBuf, sync::{Arc, Mutex, MutexGuard}, thread};
 
 use reqwest::blocking::{Client, ClientBuilder};
+use simple_semaphore::Semaphore;
 
 use crate::{event_bus::{self, EventBus}, modules::Module, args, config, database, debug, logger, modules, state};
 
@@ -19,7 +20,7 @@ pub struct Session {
     database: Arc<Mutex<database::Database>>,
     state: Arc<state::State>,
     http_client: Client,
-    shutdown: Arc<(Mutex<bool>, Condvar)>,
+    shutdown: Arc<Semaphore>,
 }
 
 impl Session {
@@ -39,7 +40,7 @@ impl Session {
                 .tls_info(true)
                 .build()
                 .expect("Client::new()"),
-            shutdown: Arc::new((Mutex::new(false), Condvar::new())),
+            shutdown: Semaphore::new(0),
         })
     }
 
@@ -329,9 +330,7 @@ impl Session {
                     logger::error("session", e.to_string());
                 }
 
-                let (mutex, condvar) = &*session.shutdown;
-                *mutex.lock().unwrap() = true;
-                condvar.notify_all();
+                session.shutdown.release();
             }
         });
 
@@ -349,10 +348,7 @@ impl Session {
             self.get_args().domain.clone(),
         ));
 
-        let (mutex, condvar) = &*self.shutdown;
-        let _shutdown_guard = condvar
-            .wait_while(mutex.lock().unwrap(), |shutdown| !*shutdown)
-            .unwrap();
+        self.shutdown.acquire();
 
         Ok(())
     }
