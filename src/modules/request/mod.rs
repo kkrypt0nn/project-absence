@@ -41,15 +41,9 @@ impl fmt::Debug for HttpResponse {
 
 pub struct ModuleRequest;
 
-impl ModuleRequest {
-    pub fn new() -> Self {
-        ModuleRequest
-    }
-}
-
 impl Module for ModuleRequest {
-    fn name(&self) -> String {
-        String::from("request")
+    fn name(&self) -> &'static str {
+        "request"
     }
 
     fn description(&self) -> String {
@@ -61,25 +55,22 @@ impl Module for ModuleRequest {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let domain = match event {
-            Event::DiscoveredDomain(domain) => domain,
-            _ => {
-                return Err("Received wrong event, exiting module".to_string());
-            }
+        let Event::DiscoveredDomain(domain) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
 
         if session.get_state().has_discovered_domain(domain.clone()) {
             if session.get_state().is_debug_or_verbose() {
                 logger::debug(
                     self.name(),
-                    format!("Skipping already discovered domain: {}", domain),
+                    format!("Skipping already discovered domain: {domain}"),
                 );
             }
             return Ok(());
         }
         session.get_state().discover_domain(domain.clone());
 
-        let url = format!("https://{}", domain);
+        let url = format!("https://{domain}");
         let response = match session
             .get_http_client()
             .get(&url)
@@ -88,7 +79,7 @@ impl Module for ModuleRequest {
         {
             Ok(r) => r,
             Err(e) => {
-                logger::error(self.name(), format!("Failed to request {}: {}", domain, e));
+                logger::error(self.name(), format!("Failed to request {domain}: {e}"));
                 return Ok(());
             }
         };

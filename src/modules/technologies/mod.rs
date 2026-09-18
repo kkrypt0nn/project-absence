@@ -1,19 +1,13 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::vec;
+use std::{collections::HashMap, sync::Arc};
 
-use crate::database::node::Type;
-use crate::event_bus::Event;
-use crate::logger;
-use crate::modules::Module;
-use crate::session::Session;
+use crate::{database::node::Type, event_bus::Event, logger, modules::Module, session::Session};
 
 pub struct ModuleTechnologies {
     signatures: HashMap<&'static str, Vec<&'static str>>,
 }
 
-impl ModuleTechnologies {
-    pub fn new() -> Self {
+impl Default for ModuleTechnologies {
+    fn default() -> Self {
         let mut signatures: HashMap<&'static str, Vec<&'static str>> = HashMap::new();
 
         signatures.insert("astro", vec!["content=\"Astro v\"", "data-astro-cid-"]);
@@ -27,13 +21,13 @@ impl ModuleTechnologies {
             vec!["ng-version", "_ngcontent-ng-", "_nghost-ng-"],
         );
 
-        ModuleTechnologies { signatures }
+        Self { signatures }
     }
 }
 
 impl Module for ModuleTechnologies {
-    fn name(&self) -> String {
-        String::from("technologies")
+    fn name(&self) -> &'static str {
+        "technologies"
     }
 
     fn description(&self) -> String {
@@ -47,14 +41,13 @@ impl Module for ModuleTechnologies {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let fetched_data = match event {
-            Event::DomainFetched(fetched_data) => fetched_data,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DomainFetched(fetched_data) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
         let domain = &fetched_data.domain;
         let body = &fetched_data.response.body;
 
-        let mut technologies_found: Vec<&str> = Vec::new();
+        let mut technologies_found: Vec<&str> = vec![];
         for (tech, keywords) in &self.signatures {
             if keywords.iter().any(|keyword| body.contains(keyword)) {
                 technologies_found.push(tech);

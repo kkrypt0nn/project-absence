@@ -5,9 +5,9 @@ pub static LOGGER: LazyLock<Mutex<tangra::Logger>> =
 
 fn parse_event_name(event: String) -> String {
     if !event.is_empty() {
-        format!("({})", event)
+        format!("({event})")
     } else {
-        String::from("")
+        String::new()
     }
 }
 

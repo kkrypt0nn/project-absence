@@ -1,17 +1,13 @@
-use std::collections::HashMap;
-use std::str::FromStr;
-use std::sync::Arc;
-use std::vec;
+use std::{collections::HashMap, str::FromStr, sync::Arc};
 
-use domain::base::{Name, Rtype};
-use domain::rdata::AllRecordData;
-use domain::resolv::StubResolver;
+use domain::{
+    base::{Name, Rtype},
+    rdata::AllRecordData,
+    resolv::StubResolver,
+};
 use serde::Serialize;
 
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, flags, logger};
+use crate::{config, event_bus::Event, flags, logger, modules::Module, session::Session};
 
 #[derive(Serialize)]
 struct DnsRecordEntry {
@@ -24,18 +20,18 @@ pub struct ModuleDns {
 }
 
 impl ModuleDns {
-    pub fn new(config: config::DnsConfig) -> Self {
-        ModuleDns { config }
+    pub const fn new(config: config::DnsConfig) -> Self {
+        Self { config }
     }
 
     fn name_with_record_type(&self, record_type: Rtype) -> String {
-        format!("{}({})", self.name(), record_type)
+        format!("{}({record_type})", self.name())
     }
 }
 
 impl Module for ModuleDns {
-    fn name(&self) -> String {
-        String::from("dns")
+    fn name(&self) -> &'static str {
+        "dns"
     }
 
     fn description(&self) -> String {
@@ -49,23 +45,19 @@ impl Module for ModuleDns {
     }
 
     fn execute(&self, _session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let fetched_data = match event {
-            Event::DomainFetched(fetched_data) => fetched_data,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DomainFetched(fetched_data) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
         let domain = &fetched_data.domain;
         let name =
-            Name::<Vec<u8>>::from_str(domain).map_err(|_| format!("Invalid domain: {}", domain))?;
+            Name::<Vec<u8>>::from_str(domain).map_err(|_| format!("Invalid domain: {domain}"))?;
 
         let mut dns_data: HashMap<String, Vec<DnsRecordEntry>> = HashMap::new();
 
         for record_type in &self.config.record_types {
-            let rtype = match Rtype::from_str(record_type) {
-                Ok(r) => r,
-                Err(_) => {
-                    logger::error(self.name(), format!("Invalid record type: {}", record_type));
-                    continue;
-                }
+            let Ok(rtype) = Rtype::from_str(record_type) else {
+                logger::error(self.name(), format!("Invalid record type: {record_type}"));
+                continue;
             };
 
             // Cloning a Vec<u8> is probably cheaper than parsing all the time (?)
@@ -77,7 +69,7 @@ impl Module for ModuleDns {
                 Err(e) => {
                     logger::error(
                         self.name_with_record_type(rtype),
-                        format!("Query failed: {}", e),
+                        format!("Query failed: {e}"),
                     );
                     continue;
                 }
@@ -100,7 +92,7 @@ impl Module for ModuleDns {
                             flags |= flags::dns::IS_INTERESTING;
                             logger::println(
                                 self.name_with_record_type(rtype),
-                                format!("[INTERESTING] {}", data),
+                                format!("[INTERESTING] {data}"),
                             );
                         }
                         dns_data
@@ -111,7 +103,7 @@ impl Module for ModuleDns {
                     Err(e) => {
                         logger::error(
                             self.name_with_record_type(rtype),
-                            format!("Failed to parse record: {}", e),
+                            format!("Failed to parse record: {e}"),
                         );
                     }
                 }
@@ -123,7 +115,7 @@ impl Module for ModuleDns {
             .search(crate::database::node::Type::Domain, domain.to_string())
         {
             parent.add_data("dns".to_string(), serde_json::to_value(dns_data).unwrap());
-            logger::println(self.name(), format!("Stored DNS data for {}", domain));
+            logger::println(self.name(), format!("Stored DNS data for {domain}"));
         }
 
         Ok(())

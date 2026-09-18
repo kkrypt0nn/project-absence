@@ -1,19 +1,19 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use mlua::{UserData, UserDataMethods};
 
-use crate::database::{
-    self,
-    node::{Node, Type},
+use crate::{
+    database::node::{Node, Type},
+    session::Session,
 };
 
 pub struct LuaDatabase {
-    database: Arc<Mutex<database::Database>>,
+    session: Arc<Session>,
 }
 
 impl LuaDatabase {
-    pub fn new(database: Arc<Mutex<database::Database>>) -> Self {
-        Self { database }
+    pub const fn new(session: Arc<Session>) -> Self {
+        Self { session }
     }
 }
 
@@ -29,11 +29,9 @@ impl UserData for LuaDatabase {
                     _ => return Ok(()),
                 };
 
-                let mut db = this.database.lock().unwrap();
+                let mut db = this.session.get_database();
 
-                let node = if let Some(node_ref) = db.search(node_type, node_name) {
-                    node_ref
-                } else {
+                let Some(node) = db.search(node_type, node_name) else {
                     return Ok(());
                 };
 
@@ -65,7 +63,7 @@ impl UserData for LuaDatabase {
                     _ => return Ok(()),
                 };
 
-                let mut db = this.database.lock().unwrap();
+                let mut db = this.session.get_database();
 
                 if let Some(parent) = db.search(parent_node_type, parent_node_name) {
                     parent.connect(Node::new(new_node_type, node_name));

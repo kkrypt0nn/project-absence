@@ -4,13 +4,7 @@ use mlua::{UserData, UserDataMethods};
 
 use crate::helpers;
 
-pub struct LuaHelpers {}
-
-impl LuaHelpers {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
+pub struct LuaHelpers;
 
 impl UserData for LuaHelpers {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {

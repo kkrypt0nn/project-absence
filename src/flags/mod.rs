@@ -3,7 +3,7 @@ pub mod domain;
 
 pub const ZERO: usize = 0;
 
-pub fn contains(flags: usize, flag: usize) -> bool {
+pub const fn contains(flags: usize, flag: usize) -> bool {
     (flags & flag) == flag
 }
 

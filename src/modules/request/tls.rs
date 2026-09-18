@@ -34,7 +34,7 @@ impl TlsData {
                     _ => n.to_string(),
                 })
                 .collect(),
-            _ => Vec::new(),
+            _ => vec![],
         };
 
         Self {
@@ -58,6 +58,6 @@ fn key_type(cert: &X509Certificate) -> String {
         "1.2.840.113549.1.1.1" => "RSA".to_string(),
         "1.2.840.10045.2.1" => "EC".to_string(),
         "1.2.840.10040.4.1" => "DSA".to_string(),
-        _ => format!("Unknown({})", oid),
+        _ => format!("Unknown({oid})"),
     }
 }

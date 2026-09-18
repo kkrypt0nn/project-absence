@@ -9,12 +9,12 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn new(root: Node) -> Self {
-        Database { root }
+    pub const fn new(root: Node) -> Self {
+        Self { root }
     }
 
     #[allow(dead_code)]
-    pub fn get_root(&mut self) -> &mut Node {
+    pub const fn get_root(&mut self) -> &mut Node {
         &mut self.root
     }
 

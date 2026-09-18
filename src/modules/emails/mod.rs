@@ -15,7 +15,7 @@ pub enum Runners {
 impl fmt::Display for Runners {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Runners::Dork => {
+            Self::Dork => {
                 write!(formatter, "dork")
             }
         }
@@ -27,14 +27,14 @@ pub struct EmailDiscoveryModule {
 }
 
 impl EmailDiscoveryModule {
-    pub fn new(runners: Vec<Box<dyn Module>>) -> Self {
+    pub const fn new(runners: Vec<Box<dyn Module>>) -> Self {
         Self { runners }
     }
 }
 
 impl Module for EmailDiscoveryModule {
-    fn name(&self) -> String {
-        String::from("discovery:emails")
+    fn name(&self) -> &'static str {
+        "discovery:emails"
     }
 
     fn description(&self) -> String {

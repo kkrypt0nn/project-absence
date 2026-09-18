@@ -55,21 +55,17 @@ impl Args {
     pub fn parse_config(&self) -> Result<Config, String> {
         let home_dir = env::var("HOME")
             .or_else(|_| env::var("USERPROFILE"))
-            .unwrap_or_else(|_| String::from(""));
+            .unwrap_or_default();
         let config_path = &self.config;
-        let expanded_config_path = if config_path.starts_with("~") {
+        let expanded_config_path = if config_path.starts_with('~') {
             let mut expanded_path = config_path.clone();
             expanded_path.replace_range(0..1, &home_dir);
             PathBuf::from(expanded_path)
         } else {
             PathBuf::from(config_path)
         };
-        let toml_content = fs::read_to_string(&expanded_config_path).map_err(|e| {
-            format!(
-                "Failed to read config file ({:?}): {}",
-                expanded_config_path, e
-            )
-        })?;
-        toml::from_str(&toml_content).map_err(|e| format!("Failed to parse TOML config: {}", e))
+        let toml_content = fs::read_to_string(&expanded_config_path)
+            .map_err(|e| format!("Failed to read config file ({expanded_config_path:?}): {e}"))?;
+        toml::from_str(&toml_content).map_err(|e| format!("Failed to parse TOML config: {e}"))
     }
 }

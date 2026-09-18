@@ -2,13 +2,7 @@ use mlua::{UserData, UserDataMethods};
 
 use crate::logger;
 
-pub struct LuaLogger {}
-
-impl LuaLogger {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
+pub struct LuaLogger;
 
 impl UserData for LuaLogger {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {

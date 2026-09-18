@@ -1,17 +1,18 @@
-use std::collections::HashMap;
-use std::fmt;
-use std::sync::Arc;
+use std::{collections::HashMap, fmt, sync::Arc};
 
 use regex::Regex;
 use reqwest::header::USER_AGENT;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::database::node::{Node, Type};
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, helpers, logger};
+use crate::{
+    config,
+    database::node::{Node, Type},
+    event_bus::Event,
+    helpers, logger,
+    modules::Module,
+    session::Session,
+};
 
 #[derive(
     Copy, Clone, Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord, Serialize, Hash,
@@ -27,13 +28,13 @@ pub enum SearchEngine {
 impl fmt::Display for SearchEngine {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            SearchEngine::Brave => {
+            Self::Brave => {
                 write!(formatter, "brave")
             }
-            SearchEngine::Ecosia => {
+            Self::Ecosia => {
                 write!(formatter, "ecosia")
             }
-            SearchEngine::Google => {
+            Self::Google => {
                 write!(formatter, "google")
             }
         }
@@ -47,7 +48,7 @@ pub struct Runner {
 
 impl Runner {
     pub fn new(config: config::SubdomainsDorkConfig) -> Self {
-        Runner {
+        Self {
             base_urls: HashMap::from([
                 (
                     SearchEngine::Brave,
@@ -67,7 +68,7 @@ impl Runner {
     }
 
     fn name_with_search_engine(&self, search_engine: SearchEngine) -> String {
-        format!("{}({})", self.name(), search_engine)
+        format!("{}({search_engine})", self.name())
     }
 
     fn get_domains(
@@ -80,10 +81,10 @@ impl Runner {
             .base_urls
             .get(&search_engine)
             .unwrap()
-            .replace("{{QUERY}}", format!("site%3A{}", domain).as_str());
+            .replace("{{QUERY}}", format!("site%3A{domain}").as_str());
         if let Ok(response) = session
             .get_http_client()
-            .get(uri.clone())
+            .get(uri)
             // https://github.com/benbusby/whoogle-search/issues/1211
             .header(
                 USER_AGENT,
@@ -93,7 +94,7 @@ impl Runner {
         {
             let html = response.text().unwrap_or_default();
             let re = Regex::new(&format!(
-                r#"\bhttps://([a-zA-Z0-9.-]+\.{})\b"#,
+                r"\bhttps://([a-zA-Z0-9.-]+\.{})\b",
                 regex::escape(&domain)
             ))
             .unwrap();
@@ -102,14 +103,14 @@ impl Runner {
                 .filter_map(|cap| cap.get(1).map(|subdomain| subdomain.as_str().to_string()))
                 .collect::<Vec<String>>())
         } else {
-            Err(format!("Unable to reach {}", search_engine))
+            Err(format!("Unable to reach {search_engine}"))
         }
     }
 }
 
 impl Module for Runner {
-    fn name(&self) -> String {
-        String::from("discovery:subdomains:dork")
+    fn name(&self) -> &'static str {
+        "discovery:subdomains:dork"
     }
 
     fn description(&self) -> String {
@@ -123,9 +124,8 @@ impl Module for Runner {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let domain = match event {
-            Event::DiscoveredDomain(domain) => domain,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DiscoveredDomain(domain) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
         let search_engine = self.config.search_engine.unwrap_or_default();
 
@@ -138,7 +138,7 @@ impl Module for Runner {
                     {
                         logger::println(
                             self.name_with_search_engine(search_engine),
-                            format!("Discovered '{}' as a new subdomain", subdomain),
+                            format!("Discovered '{subdomain}' as a new subdomain"),
                         );
 
                         if let Some(parent) =

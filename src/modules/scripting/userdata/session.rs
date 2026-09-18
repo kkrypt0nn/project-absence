@@ -1,31 +1,25 @@
 use mlua::{UserData, UserDataMethods};
 use reqwest::header::USER_AGENT;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
-use crate::event_bus::Event;
-use crate::session::Session;
-use crate::{database, helpers};
+use crate::{event_bus::Event, helpers, session::Session};
 
 use super::database::LuaDatabase;
 
 pub struct LuaSession {
     session: Arc<Session>,
-    database: Arc<Mutex<database::Database>>,
 }
 
 impl LuaSession {
-    pub fn new(session: Arc<Session>) -> Self {
-        Self {
-            database: Arc::clone(&session.get_database_arc()),
-            session,
-        }
+    pub const fn new(session: Arc<Session>) -> Self {
+        Self { session }
     }
 }
 
 impl UserData for LuaSession {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("database", |_, this, ()| {
-            Ok(LuaDatabase::new(Arc::clone(&this.database)))
+        methods.add_method("database", |_, this: &Self, ()| {
+            Ok(LuaDatabase::new(Arc::clone(&this.session)))
         });
 
         methods.add_method("discover_domain", |_, this, domain: String| {
@@ -36,7 +30,7 @@ impl UserData for LuaSession {
         methods.add_method(
             "http_get",
             |_, this, (url, user_agent): (String, Option<String>)| {
-                let ua = user_agent.unwrap_or(helpers::ua::get_random().to_string());
+                let ua = user_agent.unwrap_or_else(|| helpers::ua::get_random().to_string());
                 let response = this
                     .session
                     .get_http_client()

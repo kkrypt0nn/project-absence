@@ -1,30 +1,29 @@
-use std::collections::HashSet;
-use std::sync::Arc;
-use std::time::Duration;
-use std::vec;
+use std::{collections::HashSet, sync::Arc, time::Duration};
 
-use reqwest::StatusCode;
-use reqwest::header::USER_AGENT;
+use reqwest::{StatusCode, header::USER_AGENT};
 
-use crate::database::node::{Node, Type};
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, helpers, logger};
+use crate::{
+    config,
+    database::node::{Node, Type},
+    event_bus::Event,
+    helpers, logger,
+    modules::Module,
+    session::Session,
+};
 
 pub struct Runner {
     config: config::EndpointsWaybackMachineConfig,
 }
 
 impl Runner {
-    pub fn new(config: config::EndpointsWaybackMachineConfig) -> Self {
-        Runner { config }
+    pub const fn new(config: config::EndpointsWaybackMachineConfig) -> Self {
+        Self { config }
     }
 }
 
 impl Module for Runner {
-    fn name(&self) -> String {
-        String::from("discovery:endpoint:wayback_machine")
+    fn name(&self) -> &'static str {
+        "discovery:endpoint:wayback_machine"
     }
 
     fn description(&self) -> String {
@@ -36,16 +35,15 @@ impl Module for Runner {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let domain = match event {
-            Event::DiscoveredDomain(domain) => domain,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DiscoveredDomain(domain) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
 
         let timeout_seconds = self.config.timeout.unwrap_or(30);
 
         let response = session
             .get_http_client()
-            .get(format!("https://web.archive.org/cdx/search/cdx?url={}/*&output=txt&collapse=urlkey&fl=original&page=/", domain))
+            .get(format!("https://web.archive.org/cdx/search/cdx?url={domain}/*&output=txt&collapse=urlkey&fl=original&page=/"))
             .header(USER_AGENT, helpers::ua::get_random())
             .timeout(Duration::from_secs(timeout_seconds))
             .send();
@@ -53,13 +51,13 @@ impl Module for Runner {
             Ok(response) => {
                 let status = response.status();
                 if status != StatusCode::OK {
-                    return Err(format!("Wayback Machine returned status code {}", status));
+                    return Err(format!("Wayback Machine returned status code {status}"));
                 }
 
                 let text = response.text().unwrap_or_default();
                 let mut seen = HashSet::new();
                 let endpoints: Vec<&str> = text.lines().filter(|line| seen.insert(*line)).filter(|item| !session.get_state().has_discovered_endpoint(item.to_string())).collect();
-                logger::println(self.name(), format!("Discovered $[effect:bold]{}$[effect:reset] new endpoints for the '{}' domain on the Wayback Machine", endpoints.len(), domain));
+                logger::println(self.name(), format!("Discovered $[effect:bold]{}$[effect:reset] new endpoints for the '{domain}' domain on the Wayback Machine", endpoints.len()));
 
                 for endpoint in endpoints {
                     if let Some(parent) =

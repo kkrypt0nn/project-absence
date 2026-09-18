@@ -5,25 +5,28 @@ use serde_json::Value;
 
 use reqwest::header::USER_AGENT;
 
-use crate::database::node::{Node, Type};
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, helpers, logger};
+use crate::{
+    config,
+    database::node::{Node, Type},
+    event_bus::Event,
+    helpers, logger,
+    modules::Module,
+    session::Session,
+};
 
 pub struct Runner {
     _config: config::SubdomainsCrtNameConfig,
 }
 
 impl Runner {
-    pub fn new(config: config::SubdomainsCrtNameConfig) -> Self {
-        Runner { _config: config }
+    pub const fn new(config: config::SubdomainsCrtNameConfig) -> Self {
+        Self { _config: config }
     }
 }
 
 impl Module for Runner {
-    fn name(&self) -> String {
-        String::from("discovery:subdomains:crtname")
+    fn name(&self) -> &'static str {
+        "discovery:subdomains:crtname"
     }
 
     fn description(&self) -> String {
@@ -37,9 +40,8 @@ impl Module for Runner {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let domain = match event {
-            Event::DiscoveredDomain(domain) => domain,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DiscoveredDomain(domain) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
 
         // Only apex allowed
@@ -49,14 +51,14 @@ impl Module for Runner {
 
         let response = session
             .get_http_client()
-            .get(format!("https://crt.name/v1/search?apex={}", domain))
+            .get(format!("https://crt.name/v1/search?apex={domain}"))
             .header(USER_AGENT, helpers::ua::get_random())
             .send();
         match response {
             Ok(response) => {
                 let status = response.status();
                 if status != StatusCode::OK {
-                    return Err(format!("crt.name returned status code {}", status));
+                    return Err(format!("crt.name returned status code {status}"));
                 }
 
                 let body = response
@@ -77,7 +79,7 @@ impl Module for Runner {
 
                     logger::println(
                         self.name(),
-                        format!("Discovered '{}' as a new subdomain", subdomain),
+                        format!("Discovered '{subdomain}' as a new subdomain"),
                     );
 
                     if let Some(parent) =

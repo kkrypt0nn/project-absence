@@ -19,7 +19,7 @@ default = []
 clipboard = ["dep:arboard"]
 
 [dependencies]
-arboard = { version = "=3.6.1", optional = true }
+arboard = { version = "=3.6.1", optional = true, default-features = false }
 base64 = "=0.23.1"
 chrono = "=0.4.45"
 clap = { version = "=4.6.6", features = ["derive"] }

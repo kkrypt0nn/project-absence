@@ -7,25 +7,28 @@ use serde_json::Value;
 
 use reqwest::header::USER_AGENT;
 
-use crate::database::node::{Node, Type};
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::session::Session;
-use crate::{config, flags, helpers, logger};
+use crate::{
+    config,
+    database::node::{Node, Type},
+    event_bus::Event,
+    flags, helpers, logger,
+    modules::Module,
+    session::Session,
+};
 
 pub struct Runner {
     config: config::SubdomainsCrtShConfig,
 }
 
 impl Runner {
-    pub fn new(config: config::SubdomainsCrtShConfig) -> Self {
-        Runner { config }
+    pub const fn new(config: config::SubdomainsCrtShConfig) -> Self {
+        Self { config }
     }
 }
 
 impl Module for Runner {
-    fn name(&self) -> String {
-        String::from("discovery:subdomains:crtsh")
+    fn name(&self) -> &'static str {
+        "discovery:subdomains:crtsh"
     }
 
     fn description(&self) -> String {
@@ -37,24 +40,23 @@ impl Module for Runner {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let domain = match event {
-            Event::DiscoveredDomain(domain) => domain,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DiscoveredDomain(domain) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
 
-        let ignore_expired = self.config.ignore_expired.unwrap_or(false);
-        let recent_only = self.config.recent_only.unwrap_or(false);
+        let ignore_expired = self.config.ignore_expired.unwrap_or_default();
+        let recent_only = self.config.recent_only.unwrap_or_default();
 
         let response = session
             .get_http_client()
-            .get(format!("https://crt.sh/?q={}&output=json", domain))
+            .get(format!("https://crt.sh/?q={domain}&output=json"))
             .header(USER_AGENT, helpers::ua::get_random())
             .send();
         match response {
             Ok(response) => {
                 let status = response.status();
                 if status != StatusCode::OK {
-                    return Err(format!("crt.sh returned status code {}", status));
+                    return Err(format!("crt.sh returned status code {status}"));
                 }
                 let items: Vec<CrtShItem> = response.json().unwrap_or_default();
                 for item in items {
@@ -96,8 +98,7 @@ impl Module for Runner {
                             logger::println(
                                 self.name(),
                                 format!(
-                                    "Discovered '{}' as a new subdomain{}{}",
-                                    name_value,
+                                    "Discovered '{name_value}' as a new subdomain{}{}",
                                     if has_expired {
                                         " $[fg:red]$[effect:bold](Certificate expired, likely inactive)"
                                     } else {

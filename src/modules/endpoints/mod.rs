@@ -15,7 +15,7 @@ pub enum Runners {
 impl fmt::Display for Runners {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Runners::WaybackMachine => {
+            Self::WaybackMachine => {
                 write!(formatter, "wayback_machine")
             }
         }
@@ -27,14 +27,14 @@ pub struct EndpointDiscoveryModule {
 }
 
 impl EndpointDiscoveryModule {
-    pub fn new(runners: Vec<Box<dyn Module>>) -> Self {
+    pub const fn new(runners: Vec<Box<dyn Module>>) -> Self {
         Self { runners }
     }
 }
 
 impl Module for EndpointDiscoveryModule {
-    fn name(&self) -> String {
-        String::from("discovery:endpoint")
+    fn name(&self) -> &'static str {
+        "discovery:endpoint"
     }
 
     fn description(&self) -> String {

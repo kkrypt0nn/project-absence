@@ -1,21 +1,12 @@
 use std::sync::Arc;
 
-use crate::event_bus::Event;
-use crate::logger;
-use crate::modules::Module;
-use crate::session::Session;
+use crate::{event_bus::Event, logger, modules::Module, session::Session};
 
-pub struct ModuleReady {}
-
-impl ModuleReady {
-    pub fn new() -> Self {
-        ModuleReady {}
-    }
-}
+pub struct ModuleReady;
 
 impl Module for ModuleReady {
-    fn name(&self) -> String {
-        String::from("ready")
+    fn name(&self) -> &'static str {
+        "ready"
     }
 
     fn description(&self) -> String {

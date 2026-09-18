@@ -19,13 +19,13 @@ pub enum Runners {
 impl fmt::Display for Runners {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Runners::Crtname => {
+            Self::Crtname => {
                 write!(formatter, "crtname")
             }
-            Runners::Crtsh => {
+            Self::Crtsh => {
                 write!(formatter, "crtsh")
             }
-            Runners::Dork => {
+            Self::Dork => {
                 write!(formatter, "dork")
             }
         }
@@ -37,14 +37,14 @@ pub struct SubdomainDiscoveryModule {
 }
 
 impl SubdomainDiscoveryModule {
-    pub fn new(runners: Vec<Box<dyn Module>>) -> Self {
+    pub const fn new(runners: Vec<Box<dyn Module>>) -> Self {
         Self { runners }
     }
 }
 
 impl Module for SubdomainDiscoveryModule {
-    fn name(&self) -> String {
-        String::from("discovery:subdomains")
+    fn name(&self) -> &'static str {
+        "discovery:subdomains"
     }
 
     fn description(&self) -> String {

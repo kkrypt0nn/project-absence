@@ -1,14 +1,22 @@
-use std::fs::{File, create_dir_all};
-use std::io::{Error, Write};
-use std::path::PathBuf;
-use std::sync::{Arc, Condvar, Mutex, MutexGuard};
-use std::{env, thread};
+use std::{
+    env,
+    fs::{File, create_dir_all},
+    io::{Error, Write},
+    path::PathBuf,
+    sync::{Arc, Mutex, MutexGuard},
+    thread,
+};
 
 use reqwest::blocking::{Client, ClientBuilder};
+use simple_semaphore::Semaphore;
 
-use crate::event_bus::{self, EventBus};
-use crate::modules::Module;
-use crate::{args, config, database, debug, logger, modules, state};
+use crate::{
+    args, config, database, debug,
+    event_bus::{self, EventBus},
+    logger, modules,
+    modules::Module,
+    state,
+};
 
 macro_rules! add_runner {
     ($enabled_runners:expr, $runners_vec:expr, $name:expr, $cfg:expr, $constructor:path) => {
@@ -22,10 +30,10 @@ pub struct Session {
     args: args::Args,
     bus: EventBus,
     config: config::Config,
-    database: Arc<Mutex<database::Database>>,
-    state: Arc<state::State>,
+    database: Mutex<database::Database>,
+    state: state::State,
     http_client: Client,
-    shutdown: Arc<(Mutex<bool>, Condvar)>,
+    shutdown: Arc<Semaphore>,
 }
 
 impl Session {
@@ -33,23 +41,24 @@ impl Session {
         let domain_clone = args.clone().domain;
         let is_verbose = args.verbose;
         let is_debug = args.debug;
-        Arc::new(Session {
+        Arc::new(Self {
             args,
-            bus: EventBus::new(),
+            bus: EventBus::default(),
             config,
-            database: Arc::new(Mutex::new(database::Database::new(
-                database::node::Node::new(database::node::Type::Domain, domain_clone),
+            database: Mutex::new(database::Database::new(database::node::Node::new(
+                database::node::Type::Domain,
+                domain_clone,
             ))),
-            state: Arc::new(state::State::new(is_verbose, is_debug)),
+            state: state::State::new(is_verbose, is_debug),
             http_client: ClientBuilder::new()
                 .tls_info(true)
                 .build()
                 .expect("Client::new()"),
-            shutdown: Arc::new((Mutex::new(false), Condvar::new())),
+            shutdown: Semaphore::new(0),
         })
     }
 
-    pub fn get_args(&self) -> &args::Args {
+    pub const fn get_args(&self) -> &args::Args {
         &self.args
     }
 
@@ -57,15 +66,11 @@ impl Session {
         self.database.lock().unwrap()
     }
 
-    pub fn get_database_arc(&self) -> Arc<Mutex<database::Database>> {
-        Arc::clone(&self.database)
+    pub const fn get_state(&self) -> &state::State {
+        &self.state
     }
 
-    pub fn get_state(&self) -> Arc<state::State> {
-        Arc::clone(&self.state)
-    }
-
-    pub fn get_http_client(&self) -> &Client {
+    pub const fn get_http_client(&self) -> &Client {
         &self.http_client
     }
 
@@ -96,9 +101,9 @@ impl Session {
 
         let home_dir = env::var("HOME")
             .or_else(|_| env::var("USERPROFILE"))
-            .unwrap_or_else(|_| String::from(""));
+            .unwrap_or_default();
         let result_path = &self.get_args().output;
-        let expanded_result_path = if result_path.starts_with("~") {
+        let expanded_result_path = if result_path.starts_with('~') {
             let mut expanded_path = result_path.clone();
             expanded_path.replace_range(0..1, &home_dir);
             expanded_path
@@ -107,7 +112,7 @@ impl Session {
         };
 
         // JSON Result
-        let json_result_path = PathBuf::from(format!("{}/results.json", expanded_result_path));
+        let json_result_path = PathBuf::from(format!("{expanded_result_path}/results.json"));
         if create_dir_all(json_result_path.parent().unwrap()).is_ok() {
             let mut file_result = File::create(json_result_path.clone())?;
             if file_result
@@ -125,14 +130,13 @@ impl Session {
         }
 
         // Markdown Result
-        let markdown_result_path = PathBuf::from(format!("{}/results.md", expanded_result_path));
+        let markdown_result_path = PathBuf::from(format!("{expanded_result_path}/results.md"));
         if create_dir_all(markdown_result_path.parent().unwrap()).is_ok() {
             let mut file_result = File::create(markdown_result_path.clone())?;
             let domains_data = self.get_database().get_root().to_markdown();
             let content = format!(
-                "# Analysis Report for '{}'\n\n## Domains\n\n{}",
-                self.get_args().domain,
-                domains_data
+                "# Analysis Report for '{}'\n\n## Domains\n\n{domains_data}",
+                self.get_args().domain
             );
             if file_result.write_all(content.as_bytes()).is_ok() {
                 logger::info(
@@ -175,9 +179,8 @@ impl Session {
                     logger::trace(
                         "bus:run",
                         format!(
-                            "Running module {} as the event {:?} has been emitted",
-                            module_clone.name(),
-                            e,
+                            "Running module {} as the event {e:?} has been emitted",
+                            module_clone.name()
                         ),
                     );
                 }
@@ -198,8 +201,8 @@ impl Session {
     // TODO: Include in the cleanup a way to prevent always having to do `config.clone()`, while also retaining a clean use of the config in the modules
     // TODO: Include in the cleanup a way to not have to add the runners manually? Maybe some register_runner macro for the module?
     pub fn register_config_modules(self: &Arc<Self>) {
-        self.register_module(modules::ready::ModuleReady::new());
-        self.register_module(modules::request::ModuleRequest::new());
+        self.register_module(modules::ready::ModuleReady);
+        self.register_module(modules::request::ModuleRequest);
 
         // Load Lua module
         // TODO: Allow multiple Lua modules in the future. For the current PoC, one is fine.
@@ -210,8 +213,8 @@ impl Session {
         }
 
         if let Some(endpoints_cfg) = &self.config.endpoints {
-            let enabled_runners = endpoints_cfg.enabled_runners.as_deref().unwrap_or(&[]);
-            let mut runners: Vec<Box<dyn Module>> = Vec::new();
+            let enabled_runners = endpoints_cfg.enabled_runners.as_deref().unwrap_or_default();
+            let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(
                 enabled_runners,
@@ -229,12 +232,12 @@ impl Session {
         if let Some(domain_takeover_cfg) = &self.config.domain_takeover
             && domain_takeover_cfg.enabled
         {
-            self.register_module(modules::domain_takeover::ModuleDomainTakeover::new());
+            self.register_module(modules::domain_takeover::ModuleDomainTakeover::default());
         }
 
         if let Some(emails_cfg) = &self.config.emails {
-            let enabled_runners = emails_cfg.enabled_runners.as_deref().unwrap_or(&[]);
-            let mut runners: Vec<Box<dyn Module>> = Vec::new();
+            let enabled_runners = emails_cfg.enabled_runners.as_deref().unwrap_or_default();
+            let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(
                 enabled_runners,
@@ -250,8 +253,11 @@ impl Session {
         }
 
         if let Some(subdomains_cfg) = &self.config.subdomains {
-            let enabled_runners = subdomains_cfg.enabled_runners.as_deref().unwrap_or(&[]);
-            let mut runners: Vec<Box<dyn Module>> = Vec::new();
+            let enabled_runners = subdomains_cfg
+                .enabled_runners
+                .as_deref()
+                .unwrap_or_default();
+            let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(
                 enabled_runners,
@@ -283,7 +289,7 @@ impl Session {
         if let Some(infrastructure_cfg) = &self.config.infrastructure
             && infrastructure_cfg.enabled
         {
-            self.register_module(modules::infrastructure::ModuleInfrastructure::new());
+            self.register_module(modules::infrastructure::ModuleInfrastructure::default());
         }
 
         if let Some(dns_cfg) = &self.config.dns
@@ -295,12 +301,12 @@ impl Session {
         if let Some(technologies_cfg) = &self.config.technologies
             && technologies_cfg.enabled
         {
-            self.register_module(modules::technologies::ModuleTechnologies::new());
+            self.register_module(modules::technologies::ModuleTechnologies::default());
         }
 
         if let Some(files_cfg) = &self.config.files {
-            let enabled_runners = files_cfg.enabled_runners.as_deref().unwrap_or(&[]);
-            let mut runners: Vec<Box<dyn Module>> = Vec::new();
+            let enabled_runners = files_cfg.enabled_runners.as_deref().unwrap_or_default();
+            let mut runners: Vec<Box<dyn Module>> = vec![];
 
             add_runner!(
                 enabled_runners,
@@ -318,36 +324,34 @@ impl Session {
 
     pub fn run(self: &Arc<Self>) -> Result<(), Error> {
         let session = Arc::clone(self);
-        let state = session.get_state();
-        self.bus.subscribe("finished:task", move |_| {
-            state.decrement_tasks();
 
-            if state.is_debug_or_verbose() {
+        self.bus.subscribe("finished:task", move |_| {
+            session.state.decrement_tasks();
+
+            if session.state.is_debug_or_verbose() {
                 logger::debug(
                     "task",
                     format!(
                         "Task finished, tasks now are at {}",
-                        state.active_tasks_count()
+                        session.state.active_tasks_count()
                     ),
                 );
             }
 
-            if state.active_tasks_count() == 0 {
+            if session.state.active_tasks_count() == 0 {
                 if let Err(e) = session.output_results() {
                     logger::error("session", e.to_string());
                 }
 
-                let (mutex, condvar) = &*session.shutdown;
-                *mutex.lock().unwrap() = true;
-                condvar.notify_all();
+                session.shutdown.release();
             }
         });
 
         if self.get_state().is_debug_or_verbose() {
             thread::spawn({
-                let state_clone = Arc::clone(&self.get_state());
+                let session_clone = Arc::clone(self);
                 move || {
-                    state_clone.actively_report();
+                    session_clone.state.actively_report();
                 }
             });
         }
@@ -357,10 +361,7 @@ impl Session {
             self.get_args().domain.clone(),
         ));
 
-        let (mutex, condvar) = &*self.shutdown;
-        let _shutdown_guard = condvar
-            .wait_while(mutex.lock().unwrap(), |shutdown| !*shutdown)
-            .unwrap();
+        self.shutdown.acquire();
 
         Ok(())
     }

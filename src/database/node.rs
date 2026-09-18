@@ -1,4 +1,7 @@
-use std::{collections::HashMap, fmt};
+use std::{
+    collections::HashMap,
+    fmt::{self, Write},
+};
 
 use serde::{Serialize, Serializer};
 use serde_json::Value;
@@ -17,16 +20,16 @@ pub enum Type {
 impl fmt::Display for Type {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Type::Domain => {
+            Self::Domain => {
                 write!(formatter, "domain")
             }
-            Type::Endpoint => {
+            Self::Endpoint => {
                 write!(formatter, "endpoint")
             }
-            Type::Email => {
+            Self::Email => {
                 write!(formatter, "email")
             }
-            Type::File => {
+            Self::File => {
                 write!(formatter, "file")
             }
         }
@@ -46,7 +49,7 @@ impl Serialize for Type {
 pub struct Node {
     r#type: Type,
     value: String,
-    connections: Vec<Node>,
+    connections: Vec<Self>,
     data: HashMap<String, Value>,
 }
 
@@ -65,21 +68,21 @@ impl fmt::Display for Node {
 
 impl Node {
     pub fn new(r#type: Type, value: String) -> Self {
-        Node {
+        Self {
             r#type,
             value,
-            connections: Vec::new(),
+            connections: vec![],
             data: HashMap::new(),
         }
     }
 
-    pub fn connect(&mut self, node: Node) {
+    pub fn connect(&mut self, node: Self) {
         self.connections.push(node);
     }
 
     #[allow(unused)]
     pub fn add(&mut self, r#type: Type, value: String) {
-        self.connect(Node::new(r#type, value));
+        self.connect(Self::new(r#type, value));
     }
 
     pub fn add_data(&mut self, key: String, value: Value) {
@@ -116,11 +119,11 @@ impl Node {
             .expect("JSON object should exist")
     }
 
-    pub fn get_connections(&self) -> Vec<Node> {
+    pub fn get_connections(&self) -> Vec<Self> {
         self.connections.clone()
     }
 
-    pub fn find(&mut self, node: &Node) -> Option<&mut Node> {
+    pub fn find(&mut self, node: &Self) -> Option<&mut Self> {
         if self.equals(node) {
             return Some(self);
         }
@@ -136,7 +139,7 @@ impl Node {
         None
     }
 
-    pub fn equals(&self, other: &Node) -> bool {
+    pub fn equals(&self, other: &Self) -> bool {
         // Check type and value
         if self.r#type != other.r#type || self.value != other.value {
             return false;
@@ -155,7 +158,8 @@ impl Node {
     pub fn to_markdown(&self) -> String {
         let flags = if let Some(flags) = self.get_data("flags") {
             let mut result = String::from("#### Flags\n");
-            result += format!(
+            write!(
+                &mut result,
                 "\n- `IS_RECENT` => {}\n- `HAS_EXPIRED` => {}\n- `POSSIBLE_TAKEOVER` => {}",
                 flags::contains_to_markdown(
                     flags.as_u64().unwrap() as usize,
@@ -180,7 +184,7 @@ impl Node {
                     "❌".to_string()
                 }
             )
-            .as_str();
+            .unwrap();
             Some(result)
         } else {
             None
@@ -191,9 +195,9 @@ impl Node {
             if key == "flags" {
                 continue;
             }
-            data_markdown.push_str(&format!(
-                "#### {}\n\n{}\n\n",
-                key,
+            write!(
+                &mut data_markdown,
+                "#### {key}\n\n{}\n\n",
                 match value {
                     Value::Object(_) | Value::Array(_) => {
                         format!(
@@ -203,14 +207,15 @@ impl Node {
                     }
                     _ => value.to_string(),
                 }
-            ));
+            )
+            .unwrap();
         }
 
         let connections_markdown = self
             .get_connections()
             .iter()
             .filter(|conn| !matches!(conn.r#type, Type::Endpoint))
-            .map(|conn| conn.to_markdown())
+            .map(Self::to_markdown)
             .collect::<Vec<String>>()
             .join("\n\n");
 
@@ -236,7 +241,7 @@ impl Node {
             sections.push(data_markdown.trim().to_string());
         }
         if !endpoint_connections.is_empty() {
-            sections.push(format!("#### Endpoints\n{}", endpoint_connections));
+            sections.push(format!("#### Endpoints\n{endpoint_connections}"));
         }
         if !connections_markdown.is_empty() {
             sections.push(connections_markdown);

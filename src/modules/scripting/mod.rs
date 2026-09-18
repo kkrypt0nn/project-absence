@@ -1,13 +1,13 @@
-use std::fs;
-use std::sync::Arc;
+use std::{fs, sync::Arc};
 
 use mlua::Function;
 
-use crate::event_bus::Event;
-use crate::modules::Module;
-use crate::modules::scripting::userdata::event::LuaEvent;
-use crate::modules::scripting::userdata::session::LuaSession;
-use crate::session::Session;
+use crate::{
+    event_bus::Event,
+    modules::Module,
+    modules::scripting::userdata::{event::LuaEvent, session::LuaSession},
+    session::Session,
+};
 
 mod globals;
 mod userdata;
@@ -23,7 +23,7 @@ impl Scripting {
         let script = fs::read_to_string(script_path).map_err(|e| e.to_string())?;
         let module: mlua::Table = lua.load(&script).eval().map_err(|e| e.to_string())?;
         let mluascript = Self { lua, module };
-        mluascript.setup_globals().map_err(|e| e.to_string())?;
+        mluascript.setup_globals()?;
         Ok(mluascript)
     }
 
@@ -34,8 +34,8 @@ impl Scripting {
 }
 
 impl Module for Scripting {
-    fn name(&self) -> String {
-        String::from("scripting")
+    fn name(&self) -> &'static str {
+        "scripting"
     }
 
     fn description(&self) -> String {
@@ -43,9 +43,7 @@ impl Module for Scripting {
             .get::<Function>("description")
             .unwrap()
             .call::<String>("")
-            .unwrap_or(String::from(
-                "This module is responsible to execute a Lua script.",
-            ))
+            .unwrap_or_else(|_| String::from("This module is responsible to execute a Lua script."))
     }
 
     fn subscribers(&self) -> Vec<String> {
@@ -61,7 +59,7 @@ impl Module for Scripting {
             && let Err(e) = execute_fn.call::<bool>((
                 self.name(),
                 LuaSession::new(session),
-                LuaEvent::new(event),
+                LuaEvent::new(event.clone()),
             ))
         {
             return Err(e.to_string());

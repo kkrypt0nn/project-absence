@@ -1,12 +1,6 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::vec;
+use std::{collections::HashMap, sync::Arc};
 
-use crate::database::node::Type;
-use crate::event_bus::Event;
-use crate::logger;
-use crate::modules::Module;
-use crate::session::Session;
+use crate::{database::node::Type, event_bus::Event, logger, modules::Module, session::Session};
 
 pub struct ModuleInfrastructure {
     cloud_provider: HashMap<&'static str, Vec<&'static str>>,
@@ -14,9 +8,9 @@ pub struct ModuleInfrastructure {
     security_headers: Vec<&'static str>,
 }
 
-impl ModuleInfrastructure {
-    pub fn new() -> Self {
-        ModuleInfrastructure {
+impl Default for ModuleInfrastructure {
+    fn default() -> Self {
+        Self {
             cloud_provider: HashMap::from([
                 (
                     "amazon",
@@ -78,8 +72,8 @@ impl ModuleInfrastructure {
 }
 
 impl Module for ModuleInfrastructure {
-    fn name(&self) -> String {
-        String::from("infrastructure")
+    fn name(&self) -> &'static str {
+        "infrastructure"
     }
 
     fn description(&self) -> String {
@@ -93,9 +87,8 @@ impl Module for ModuleInfrastructure {
     }
 
     fn execute(&self, session: Arc<Session>, event: &Event) -> Result<(), String> {
-        let fetched_data = match event {
-            Event::DomainFetched(fetched_data) => fetched_data,
-            _ => return Err("Received wrong event, exiting module".to_string()),
+        let Event::DomainFetched(fetched_data) = event else {
+            return Err("Received wrong event, exiting module".to_string());
         };
         let domain = &fetched_data.domain;
         let tls = &fetched_data.response.tls;
@@ -113,7 +106,7 @@ impl Module for ModuleInfrastructure {
                 .search(Type::Domain, domain.to_string())
             {
                 parent.add_data("tls".to_string(), serde_json::to_value(tls_data).unwrap());
-                logger::println(self.name(), format!("Gathered TLS data for {}", domain));
+                logger::println(self.name(), format!("Gathered TLS data for {domain}"));
             }
         }
 
@@ -162,15 +155,11 @@ impl Module for ModuleInfrastructure {
             logger::println(
                 self.name(),
                 format!(
-                    "Gathered interesting and security headers for {}{}",
-                    domain,
+                    "Gathered interesting and security headers for {domain}{}",
                     if let Some(cloud_provider) = cloud_provider {
-                        format!(
-                            ", as well as the potential cloud provider ({})",
-                            cloud_provider
-                        )
+                        format!(", as well as the potential cloud provider ({cloud_provider})")
                     } else {
-                        "".to_string()
+                        String::new()
                     }
                 ),
             );

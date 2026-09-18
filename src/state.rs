@@ -1,6 +1,6 @@
 use std::{
     sync::{
-        Arc, Mutex,
+        Arc, RwLock,
         atomic::{AtomicUsize, Ordering},
     },
     thread::sleep,
@@ -14,30 +14,30 @@ use simple_semaphore::Permit;
 use crate::logger;
 
 pub struct State {
-    active_tasks: Arc<AtomicUsize>,
+    active_tasks: AtomicUsize,
     semaphore: Arc<simple_semaphore::Semaphore>,
     verbose: bool,
     debug: bool,
 
-    discovered_domains: Mutex<Vec<String>>,
-    discovered_endpoints: Mutex<Vec<String>>,
-    discovered_emails: Mutex<Vec<String>>,
-    discovered_files: Mutex<Vec<String>>,
+    discovered_domains: RwLock<Vec<String>>,
+    discovered_endpoints: RwLock<Vec<String>>,
+    discovered_emails: RwLock<Vec<String>>,
+    discovered_files: RwLock<Vec<String>>,
 }
 
 impl State {
     pub fn new(verbose: bool, debug: bool) -> Self {
-        State {
-            active_tasks: Arc::new(AtomicUsize::new(0)),
+        Self {
+            active_tasks: AtomicUsize::new(0),
             semaphore: simple_semaphore::Semaphore::new_available_parallelism()
-                .unwrap_or(simple_semaphore::Semaphore::new(8)),
+                .unwrap_or_else(|_| simple_semaphore::Semaphore::new(8)),
             verbose,
             debug,
 
-            discovered_domains: Mutex::new(Vec::new()),
-            discovered_endpoints: Mutex::new(Vec::new()),
-            discovered_emails: Mutex::new(Vec::new()),
-            discovered_files: Mutex::new(Vec::new()),
+            discovered_domains: RwLock::new(vec![]),
+            discovered_endpoints: RwLock::new(vec![]),
+            discovered_emails: RwLock::new(vec![]),
+            discovered_files: RwLock::new(vec![]),
         }
     }
 
@@ -84,50 +84,50 @@ impl State {
         self.semaphore.acquire()
     }
 
-    pub fn is_debug(&self) -> bool {
+    pub const fn is_debug(&self) -> bool {
         self.debug
     }
 
-    pub fn is_verbose(&self) -> bool {
+    pub const fn is_verbose(&self) -> bool {
         self.verbose
     }
 
-    pub fn is_debug_or_verbose(&self) -> bool {
+    pub const fn is_debug_or_verbose(&self) -> bool {
         self.is_debug() || self.is_verbose()
     }
 
     pub fn discover_domain(&self, domain: String) {
-        self.discovered_domains.lock().unwrap().push(domain)
+        self.discovered_domains.write().unwrap().push(domain)
     }
 
     pub fn has_discovered_domain(&self, domain: String) -> bool {
-        self.discovered_domains.lock().unwrap().contains(&domain)
+        self.discovered_domains.read().unwrap().contains(&domain)
     }
 
     pub fn discover_endpoint(&self, endpoint: String) {
-        self.discovered_endpoints.lock().unwrap().push(endpoint)
+        self.discovered_endpoints.write().unwrap().push(endpoint)
     }
 
     pub fn has_discovered_endpoint(&self, endpoint: String) -> bool {
         self.discovered_endpoints
-            .lock()
+            .read()
             .unwrap()
             .contains(&endpoint)
     }
 
     pub fn discover_email(&self, email: String) {
-        self.discovered_emails.lock().unwrap().push(email)
+        self.discovered_emails.write().unwrap().push(email)
     }
 
     pub fn has_discovered_email(&self, email: String) -> bool {
-        self.discovered_emails.lock().unwrap().contains(&email)
+        self.discovered_emails.read().unwrap().contains(&email)
     }
 
     pub fn discover_file(&self, file: String) {
-        self.discovered_files.lock().unwrap().push(file)
+        self.discovered_files.write().unwrap().push(file)
     }
 
     pub fn has_discovered_file(&self, file: String) -> bool {
-        self.discovered_files.lock().unwrap().contains(&file)
+        self.discovered_files.read().unwrap().contains(&file)
     }
 }

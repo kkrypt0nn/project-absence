@@ -28,34 +28,28 @@ pub enum Event {
 impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Event::Ready => {
+            Self::Ready => {
                 write!(f, "ready")
             }
-            Event::DiscoveredDomain(_) => {
+            Self::DiscoveredDomain(_) => {
                 write!(f, "discovered:domain")
             }
-            Event::DomainFetched(_) => {
+            Self::DomainFetched(_) => {
                 write!(f, "domain:fetched")
             }
-            Event::FinishedTask => write!(f, "finished:task"),
+            Self::FinishedTask => write!(f, "finished:task"),
         }
     }
 }
 
 type CallbackFn = Arc<dyn Fn(&Event) + Send + Sync>;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct EventBus {
     subscribers: Arc<RwLock<HashMap<String, Vec<CallbackFn>>>>,
 }
 
 impl EventBus {
-    pub fn new() -> EventBus {
-        EventBus {
-            subscribers: Arc::new(RwLock::new(HashMap::new())),
-        }
-    }
-
     pub fn subscribe<F>(&self, event_name: &str, callback: F)
     where
         F: Fn(&Event) + Send + Sync + 'static,

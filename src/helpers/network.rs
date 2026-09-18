@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 pub fn get_ip_addr(domain: &str) -> Option<IpAddr> {
     // 1337 is just a dummy port because apparently it absolutely needs one
-    match format!("{}:1337", domain).to_socket_addrs() {
+    match format!("{domain}:1337").to_socket_addrs() {
         Ok(mut socket_addr) => socket_addr.next().map(|addr| addr.ip()),
         Err(_) => None,
     }
@@ -18,7 +18,7 @@ pub struct GeoInfo {
 
 impl From<GeoInfo> for serde_json::Value {
     fn from(value: GeoInfo) -> Self {
-        serde_json::Value::Object(serde_json::Map::from_iter([
+        Self::Object(serde_json::Map::from_iter([
             (String::from("city"), value.city.into()),
             (String::from("country"), value.country.into()),
         ]))
@@ -27,7 +27,7 @@ impl From<GeoInfo> for serde_json::Value {
 
 pub fn geolocate_ip(ip: IpAddr) -> Option<GeoInfo> {
     // TODO: Maybe use a local DB? For now that's fine though :)
-    reqwest::blocking::get(format!("http://ip-api.com/json/{}?fields=city,country", ip))
+    reqwest::blocking::get(format!("http://ip-api.com/json/{ip}?fields=city,country"))
         .ok()?
         .json::<GeoInfo>()
         .ok()
