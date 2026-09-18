@@ -97,6 +97,7 @@ impl Module for ModuleInfrastructure {
         if let Some(tls_data) = &tls {
             for san in &tls_data.san {
                 if !session.get_state().has_discovered_domain(san.to_string()) {
+                    session.get_state().discover_domain(san.clone());
                     session.publish(Event::DiscoveredDomain(san.clone()));
                 }
             }

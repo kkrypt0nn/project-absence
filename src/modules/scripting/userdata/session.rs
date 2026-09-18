@@ -23,7 +23,14 @@ impl UserData for LuaSession {
         });
 
         methods.add_method("discover_domain", |_, this, domain: String| {
-            this.session.publish(Event::DiscoveredDomain(domain));
+            if !this
+                .session
+                .get_state()
+                .has_discovered_domain(domain.to_string())
+            {
+                this.session.get_state().discover_domain(domain.clone());
+                this.session.publish(Event::DiscoveredDomain(domain));
+            }
             Ok(())
         });
 

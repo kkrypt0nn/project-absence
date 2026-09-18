@@ -1,9 +1,11 @@
 use chrono::{TimeZone, Utc};
+use reqwest::tls::Version;
 use serde::{Deserialize, Serialize};
 use x509_parser::prelude::{GeneralName, X509Certificate};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct TlsData {
+    pub version: String,
     pub serial: String,
     pub subject: String,
     pub issuer: String,
@@ -15,7 +17,7 @@ pub struct TlsData {
 }
 
 impl TlsData {
-    pub fn from_cert(cert: &X509Certificate) -> Self {
+    pub fn from_cert(cert: &X509Certificate, version: Option<Version>) -> Self {
         let not_before = Utc
             .timestamp_opt(cert.validity.not_before.timestamp(), 0)
             .unwrap();
@@ -38,6 +40,7 @@ impl TlsData {
         };
 
         Self {
+            version: tls_version(version),
             serial: cert.raw_serial_as_string(),
             subject: cert.subject().to_string(),
             issuer: cert.issuer().to_string(),
@@ -59,5 +62,16 @@ fn key_type(cert: &X509Certificate) -> String {
         "1.2.840.10045.2.1" => "EC".to_string(),
         "1.2.840.10040.4.1" => "DSA".to_string(),
         _ => format!("Unknown({oid})"),
+    }
+}
+
+fn tls_version(version: Option<Version>) -> String {
+    match version {
+        Some(Version::TLS_1_0) => "TLS 1.0".to_string(),
+        Some(Version::TLS_1_1) => "TLS 1.1".to_string(),
+        Some(Version::TLS_1_2) => "TLS 1.2".to_string(),
+        Some(Version::TLS_1_3) => "TLS 1.3".to_string(),
+        Some(_) => "Unknown".to_string(),
+        None => "Unknown".to_string(),
     }
 }

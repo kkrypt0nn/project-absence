@@ -59,17 +59,6 @@ impl Module for ModuleRequest {
             return Err("Received wrong event, exiting module".to_string());
         };
 
-        if session.get_state().has_discovered_domain(domain.clone()) {
-            if session.get_state().is_debug_or_verbose() {
-                logger::debug(
-                    self.name(),
-                    format!("Skipping already discovered domain: {domain}"),
-                );
-            }
-            return Ok(());
-        }
-        session.get_state().discover_domain(domain.clone());
-
         let url = format!("https://{domain}");
         let response = match session
             .get_http_client()
@@ -99,7 +88,7 @@ impl Module for ModuleRequest {
             tls_info.peer_certificate().and_then(|der| {
                 parse_x509_certificate(der)
                     .ok()
-                    .map(|(_, cert)| tls::TlsData::from_cert(&cert))
+                    .map(|(_, cert)| tls::TlsData::from_cert(&cert, tls_info.version()))
             })
         });
         let body = response.text().unwrap_or_default();
