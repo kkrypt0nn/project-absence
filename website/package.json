@@ -30,8 +30,8 @@
     "dagre": "0.8.5",
     "prettier": "3.9.10",
     "prism-react-renderer": "2.4.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-modal": "3.16.3"
   },
   "devDependencies": {
@@ -53,6 +53,6 @@
     ]
   },
   "engines": {
-    "node": "24.21.0"
+    "node": "24.22.0"
   }
 }
