@@ -1,18 +1,16 @@
 use std::{collections::HashMap, fmt, sync::Arc};
 
-use regex::Regex;
-use reqwest::header::USER_AGENT;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-
 use crate::{
     config,
-    database::node::{Node, Type},
+    database::node::{Node, NodeMetadata, Type},
     event_bus::Event,
     helpers, logger,
     modules::Module,
     session::Session,
 };
+use regex::Regex;
+use reqwest::header::USER_AGENT;
+use serde::{Deserialize, Serialize};
 
 #[derive(
     Copy, Clone, Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord, Serialize, Hash,
@@ -132,33 +130,29 @@ impl Module for Runner {
         match self.get_domains(session.clone(), domain.clone(), search_engine) {
             Ok(domains) => {
                 for subdomain in domains {
-                    if !session
-                        .get_state()
-                        .has_discovered_domain(subdomain.to_string())
-                    {
-                        logger::println(
-                            self.name_with_search_engine(search_engine),
-                            format!("Discovered '{subdomain}' as a new subdomain"),
-                        );
+                    if !session.get_state().try_discover_domain(subdomain.clone()) {
+                        continue;
+                    }
 
-                        if let Some(parent) =
-                            session.get_database().search(Type::Domain, domain.clone())
-                        {
-                            let mut new_node = Node::new(Type::Domain, subdomain.to_string());
-                            if let Some(ip_addr) = helpers::network::get_ip_addr(&subdomain) {
-                                new_node.add_data(
-                                    String::from("ip"),
-                                    Value::String(ip_addr.to_string()),
-                                );
+                    logger::println(
+                        self.name_with_search_engine(search_engine),
+                        format!("Discovered '{subdomain}' as a new subdomain"),
+                    );
+                    if let Some(parent) =
+                        session.get_database().search(Type::Domain, domain.clone())
+                    {
+                        let mut new_node = Node::new(Type::Domain, subdomain.to_string());
+                        if let Some(ip_addr) = helpers::network::get_ip_addr(&subdomain) {
+                            if let NodeMetadata::Subdomain(metadata) = &mut new_node.metadata {
+                                metadata.ip = Some(ip_addr.to_string());
                                 if let Some(geoinfo) = helpers::network::geolocate_ip(ip_addr) {
-                                    new_node.add_data(String::from("geoinfo"), geoinfo.into())
+                                    metadata.geoinfo = Some(geoinfo);
                                 }
                             }
-                            parent.connect(new_node);
                         }
-                        session.get_state().discover_domain(subdomain.to_string());
-                        session.publish(Event::DiscoveredDomain(subdomain.to_string()));
+                        parent.connect(new_node);
                     }
+                    session.publish(Event::DiscoveredDomain(subdomain.to_string()));
                 }
             }
             Err(e) => logger::error(self.name_with_search_engine(search_engine), e),

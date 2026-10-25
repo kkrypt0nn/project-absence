@@ -132,18 +132,18 @@ impl Module for Runner {
         match self.get_emails(session.clone(), domain.clone(), search_engine) {
             Ok(emails) => {
                 for email in emails {
-                    if !session.get_state().has_discovered_email(email.to_string()) {
-                        logger::println(
-                            self.name_with_search_engine(search_engine),
-                            format!("Discovered '{email}' as a new email"),
-                        );
+                    if !session.get_state().try_discover_email(email.clone()) {
+                        continue;
+                    }
 
-                        if let Some(parent) =
-                            session.get_database().search(Type::Domain, domain.clone())
-                        {
-                            parent.connect(Node::new(Type::Email, email.to_string()));
-                        }
-                        session.get_state().discover_email(email.to_string());
+                    logger::println(
+                        self.name_with_search_engine(search_engine),
+                        format!("Discovered '{email}' as a new email"),
+                    );
+                    if let Some(parent) =
+                        session.get_database().search(Type::Domain, domain.clone())
+                    {
+                        parent.connect(Node::new(Type::Email, email));
                     }
                 }
             }

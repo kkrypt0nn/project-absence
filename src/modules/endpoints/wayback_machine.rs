@@ -56,16 +56,28 @@ impl Module for Runner {
 
                 let text = response.text().unwrap_or_default();
                 let mut seen = HashSet::new();
-                let endpoints: Vec<&str> = text.lines().filter(|line| seen.insert(*line)).filter(|item| !session.get_state().has_discovered_endpoint(item.to_string())).collect();
+                let mut endpoints = vec![];
+
+                for endpoint in text.lines() {
+                    if !seen.insert(endpoint) {
+                        continue;
+                    }
+
+                    if !session.get_state().try_discover_endpoint(endpoint.to_string()) {
+                        continue;
+                    }
+                    endpoints.push(endpoint);
+                }
+
                 logger::println(self.name(), format!("Discovered $[effect:bold]{}$[effect:reset] new endpoints for the '{domain}' domain on the Wayback Machine", endpoints.len()));
 
-                for endpoint in endpoints {
-                    if let Some(parent) =
-                        session.get_database().search(Type::Domain, domain.clone())
-                    {
+                if let Some(parent) = session
+                    .get_database()
+                    .search(Type::Domain, domain.clone())
+                {
+                    for endpoint in endpoints {
                         parent.connect(Node::new(Type::Endpoint, endpoint.to_string()));
                     }
-                    session.get_state().discover_endpoint(endpoint.to_string());
                 }
 
                 Ok(())

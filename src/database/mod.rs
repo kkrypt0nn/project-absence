@@ -1,5 +1,7 @@
 use node::{Node, Type};
 
+use crate::database::node::{DomainData, NodeMetadata};
+
 pub mod node;
 #[cfg(test)]
 mod tests;
@@ -9,7 +11,10 @@ pub struct Database {
 }
 
 impl Database {
-    pub const fn new(root: Node) -> Self {
+    pub fn new(mut root: Node) -> Self {
+        if root.r#type == Type::Domain {
+            root.metadata = NodeMetadata::Domain(DomainData { is_root: true });
+        }
         Self { root }
     }
 
@@ -28,6 +33,6 @@ impl Database {
     }
 
     pub fn search(&mut self, r#type: Type, value: String) -> Option<&mut Node> {
-        self.root.find(&Node::new(r#type, value))
+        self.root.find(&r#type, &value)
     }
 }

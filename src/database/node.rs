@@ -3,10 +3,14 @@ use std::{
     fmt::{self, Write},
 };
 
-use serde::{Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer};
 use serde_json::Value;
 
-use crate::flags;
+use crate::{
+    flags,
+    helpers::{network::GeoInfo, tls::TlsData},
+    modules::dns::DnsRecordEntry,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
@@ -45,12 +49,43 @@ impl Serialize for Type {
     }
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct DomainData {
+    pub is_root: bool,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct SubdomainData {
+    pub dns: Option<HashMap<String, Vec<DnsRecordEntry>>>,
+    pub possible_takeover: Option<bool>,
+    pub takeover_platform: Option<String>,
+    pub tls: Option<TlsData>,
+    pub cloud_provider: Option<String>,
+    pub interesting_headers: Option<HashMap<String, String>>,
+    pub security_headers: Option<HashMap<String, String>>,
+    pub ip: Option<String>,
+    pub geoinfo: Option<GeoInfo>,
+    pub technologies: Option<Vec<String>>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(tag = "kind", content = "metadata", rename_all = "lowercase")]
+pub enum NodeMetadata {
+    Domain(DomainData),
+    Subdomain(SubdomainData),
+    Endpoint,
+    Email,
+    File,
+}
+
 #[derive(Clone, Debug, Serialize)]
 pub struct Node {
-    r#type: Type,
+    pub r#type: Type,
     value: String,
     connections: Vec<Self>,
-    data: HashMap<String, Value>,
+    pub flags: usize,
+    pub metadata: NodeMetadata,
+    pub data: HashMap<String, Value>,
 }
 
 impl fmt::Display for Node {
@@ -68,12 +103,25 @@ impl fmt::Display for Node {
 
 impl Node {
     pub fn new(r#type: Type, value: String) -> Self {
+        let metadata = match r#type {
+            Type::Domain => NodeMetadata::Subdomain(SubdomainData::default()),
+            Type::Endpoint => NodeMetadata::Endpoint,
+            Type::Email => NodeMetadata::Email,
+            Type::File => NodeMetadata::File,
+        };
         Self {
             r#type,
             value,
             connections: vec![],
+            flags: flags::ZERO,
+            metadata,
             data: HashMap::new(),
         }
+    }
+
+    #[allow(unused)]
+    pub fn get_value(&self) -> &str {
+        &self.value
     }
 
     pub fn connect(&mut self, node: Self) {
@@ -93,19 +141,18 @@ impl Node {
         self.data.get(key)
     }
 
+    #[allow(dead_code)]
     pub fn edit_data(&mut self, key: String, new_value: Value) {
         self.data.entry(key).and_modify(|e| *e = new_value);
     }
 
     pub fn add_flag(&mut self, flag: usize) {
-        if !self.data.contains_key("flags") {
-            self.data.insert(String::from("flags"), flags::ZERO.into());
-        }
-        let current_flags = self.get_data("flags").unwrap().as_u64().unwrap_or_default() as usize;
-        self.edit_data(
-            String::from("flags"),
-            Value::Number((current_flags | flag).into()),
-        );
+        self.flags |= flag;
+    }
+
+    #[allow(dead_code)]
+    pub fn has_flag(&self, flag: usize) -> bool {
+        flags::contains(self.flags, flag)
     }
 
     #[allow(dead_code)]
@@ -123,15 +170,13 @@ impl Node {
         self.connections.clone()
     }
 
-    pub fn find(&mut self, node: &Self) -> Option<&mut Self> {
-        if self.equals(node) {
+    pub fn find(&mut self, r#type: &Type, value: &str) -> Option<&mut Self> {
+        if &self.r#type == r#type && self.value == value {
             return Some(self);
         }
 
         for connection in &mut self.connections {
-            if connection.equals(node) {
-                return Some(connection);
-            } else if let Some(found) = connection.find(node) {
+            if let Some(found) = connection.find(r#type, value) {
                 return Some(found);
             }
         }
@@ -139,46 +184,22 @@ impl Node {
         None
     }
 
-    pub fn equals(&self, other: &Self) -> bool {
-        // Check type and value
-        if self.r#type != other.r#type || self.value != other.value {
-            return false;
-        }
-
-        // Check if all the connections are the same
-        for (self_connection, other_connection) in self.connections.iter().zip(&other.connections) {
-            if !self_connection.equals(other_connection) {
-                return false;
-            }
-        }
-
-        true
-    }
-
     pub fn to_markdown(&self) -> String {
-        let flags = if let Some(flags) = self.get_data("flags") {
+        let flags = if self.flags != flags::ZERO {
             let mut result = String::from("#### Flags\n");
             write!(
                 &mut result,
                 "\n- `IS_RECENT` => {}\n- `HAS_EXPIRED` => {}\n- `POSSIBLE_TAKEOVER` => {}",
-                flags::contains_to_markdown(
-                    flags.as_u64().unwrap() as usize,
-                    flags::domain::IS_RECENT
-                ),
-                flags::contains_to_markdown(
-                    flags.as_u64().unwrap() as usize,
-                    flags::domain::HAS_EXPIRED
-                ),
-                if flags::contains(
-                    flags.as_u64().unwrap() as usize,
-                    flags::domain::POSSIBLE_TAKEOVER
-                ) {
+                flags::contains_to_markdown(self.flags, flags::domain::IS_RECENT),
+                flags::contains_to_markdown(self.flags, flags::domain::HAS_EXPIRED),
+                if flags::contains(self.flags, flags::domain::POSSIBLE_TAKEOVER) {
                     format!(
                         "✅ (Platform: `{}`)",
-                        self.get_data("possible_takeover")
-                            .unwrap_or(&Value::String("Not set".to_string()))
-                            .as_str()
-                            .unwrap_or_default()
+                        match &self.metadata {
+                            NodeMetadata::Subdomain(metadata) =>
+                                metadata.takeover_platform.as_deref().unwrap_or("Not set"),
+                            _ => "Not set",
+                        }
                     )
                 } else {
                     "❌".to_string()
@@ -192,9 +213,6 @@ impl Node {
 
         let mut data_markdown = String::new();
         for (key, value) in &self.data {
-            if key == "flags" {
-                continue;
-            }
             write!(
                 &mut data_markdown,
                 "#### {key}\n\n{}\n\n",
@@ -209,6 +227,128 @@ impl Node {
                 }
             )
             .unwrap();
+        }
+
+        let mut metadata_markdown = String::new();
+
+        match &self.metadata {
+            NodeMetadata::Domain(metadata) => {
+                write!(
+                    &mut metadata_markdown,
+                    "#### Is root\n\n{}\n\n",
+                    metadata.is_root,
+                )
+                .unwrap();
+            }
+            NodeMetadata::Subdomain(metadata) => {
+                if let Some(dns) = &metadata.dns {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### DNS\n\n{}\n\n",
+                        dns.iter()
+                            .map(|(record_type, records)| {
+                                format!(
+                                    "**{record_type}**\n{}",
+                                    records
+                                        .iter()
+                                        .map(|record| format!(
+                                            "- `{}` (flags: {})",
+                                            record.value, record.flags
+                                        ))
+                                        .collect::<Vec<_>>()
+                                        .join("\n")
+                                )
+                            })
+                            .collect::<Vec<_>>()
+                            .join("\n\n")
+                    )
+                    .unwrap();
+                }
+
+                if let Some(possible_takeover) = metadata.possible_takeover {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### Possible takeover\n\n{}\n\n",
+                        if possible_takeover {
+                            "✅ Yes"
+                        } else {
+                            "❌ No"
+                        }
+                    )
+                    .unwrap();
+                }
+
+                if let Some(tls) = &metadata.tls {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### TLS\n\n```json\n{}\n```\n\n",
+                        serde_json::to_string_pretty(tls).unwrap_or_default()
+                    )
+                    .unwrap();
+                }
+
+                if let Some(cloud_provider) = &metadata.cloud_provider {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### Cloud provider\n\n{cloud_provider}\n\n"
+                    )
+                    .unwrap();
+                }
+
+                if let Some(headers) = &metadata.interesting_headers {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### Interesting headers\n\n{}\n\n",
+                        headers
+                            .iter()
+                            .map(|(key, value)| format!("- `{key}: {value}`"))
+                            .collect::<Vec<_>>()
+                            .join("\n")
+                    )
+                    .unwrap();
+                }
+
+                if let Some(headers) = &metadata.security_headers {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### Security headers\n\n{}\n\n",
+                        headers
+                            .iter()
+                            .map(|(key, value)| format!("- `{key}: {value}`"))
+                            .collect::<Vec<_>>()
+                            .join("\n")
+                    )
+                    .unwrap();
+                }
+
+                if let Some(ip) = &metadata.ip {
+                    write!(&mut metadata_markdown, "#### IP\n\n{ip}\n\n").unwrap();
+                }
+
+                if let Some(geoinfo) = &metadata.geoinfo {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### Geolocation\n\n- **City:** {}\n- **Country:** {}\n\n",
+                        geoinfo.city.as_deref().unwrap_or("Unknown"),
+                        geoinfo.country.as_deref().unwrap_or("Unknown")
+                    )
+                    .unwrap();
+                }
+
+                if let Some(technologies) = &metadata.technologies {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### Technologies\n\n{}\n\n",
+                        technologies
+                            .iter()
+                            .map(|technology| format!("- {technology}"))
+                            .collect::<Vec<_>>()
+                            .join("\n")
+                    )
+                    .unwrap();
+                }
+            }
+            NodeMetadata::Endpoint | NodeMetadata::Email | NodeMetadata::File => {}
         }
 
         let connections_markdown = self
@@ -236,6 +376,9 @@ impl Node {
         let mut sections = vec![format!("### {}", self.value)];
         if let Some(flags) = flags {
             sections.push(flags);
+        }
+        if !metadata_markdown.is_empty() {
+            sections.push(metadata_markdown.trim().to_string());
         }
         if !data_markdown.is_empty() {
             sections.push(data_markdown.trim().to_string());

@@ -10,8 +10,9 @@ fn create_database() {
     let node = Node::new(Type::Domain, String::from("krypton.ninja"));
     let secondary_node = Node::new(Type::Domain, String::from("go.krypton.ninja"));
     let mut database = Database::new(node.clone());
-    assert!(database.get_root().equals(&node));
-    assert!(!database.get_root().equals(&secondary_node));
+    assert_eq!(database.get_root().get_value(), "krypton.ninja");
+    assert_eq!(database.get_root().r#type, Type::Domain);
+    assert_ne!(database.get_root().get_value(), secondary_node.get_value())
 }
 
 #[test]

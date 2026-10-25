@@ -140,18 +140,18 @@ impl Module for Runner {
         match self.get_files(session.clone(), domain.clone(), search_engine) {
             Ok(files) => {
                 for file in files {
-                    if !session.get_state().has_discovered_file(file.to_string()) {
-                        logger::println(
-                            self.name_with_search_engine(search_engine),
-                            format!("Discovered '{file}' as a new file"),
-                        );
+                    if !session.get_state().try_discover_file(file.clone()) {
+                        continue;
+                    }
 
-                        if let Some(parent) =
-                            session.get_database().search(Type::Domain, domain.clone())
-                        {
-                            parent.connect(Node::new(Type::File, file.to_string()));
-                        }
-                        session.get_state().discover_file(file.to_string());
+                    logger::println(
+                        self.name_with_search_engine(search_engine),
+                        format!("Discovered '{file}' as a new file"),
+                    );
+                    if let Some(parent) =
+                        session.get_database().search(Type::Domain, domain.clone())
+                    {
+                        parent.connect(Node::new(Type::File, file.to_string()));
                     }
                 }
             }

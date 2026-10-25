@@ -5,14 +5,17 @@ use domain::{
     rdata::AllRecordData,
     resolv::StubResolver,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-use crate::{config, event_bus::Event, flags, logger, modules::Module, session::Session};
+use crate::{
+    config, database::node::NodeMetadata, event_bus::Event, flags, logger, modules::Module,
+    session::Session,
+};
 
-#[derive(Serialize)]
-struct DnsRecordEntry {
-    value: String,
-    flags: usize,
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DnsRecordEntry {
+    pub value: String,
+    pub flags: usize,
 }
 
 pub struct ModuleDns {
@@ -114,8 +117,10 @@ impl Module for ModuleDns {
             .get_database()
             .search(crate::database::node::Type::Domain, domain.to_string())
         {
-            parent.add_data("dns".to_string(), serde_json::to_value(dns_data).unwrap());
-            logger::println(self.name(), format!("Stored DNS data for {domain}"));
+            if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+                metadata.dns = Some(dns_data);
+                logger::println(self.name(), format!("Stored DNS data for {domain}"));
+            }
         }
 
         Ok(())

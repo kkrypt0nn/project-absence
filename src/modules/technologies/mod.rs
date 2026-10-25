@@ -1,6 +1,12 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{database::node::Type, event_bus::Event, logger, modules::Module, session::Session};
+use crate::{
+    database::node::{NodeMetadata, Type},
+    event_bus::Event,
+    logger,
+    modules::Module,
+    session::Session,
+};
 
 pub struct ModuleTechnologies {
     signatures: HashMap<&'static str, Vec<&'static str>>,
@@ -47,10 +53,10 @@ impl Module for ModuleTechnologies {
         let domain = &fetched_data.domain;
         let body = &fetched_data.response.body;
 
-        let mut technologies_found: Vec<&str> = vec![];
+        let mut technologies_found: Vec<String> = vec![];
         for (tech, keywords) in &self.signatures {
             if keywords.iter().any(|keyword| body.contains(keyword)) {
-                technologies_found.push(tech);
+                technologies_found.push(tech.to_string());
             }
         }
 
@@ -58,16 +64,12 @@ impl Module for ModuleTechnologies {
             .get_database()
             .search(Type::Domain, domain.to_string())
         {
-            parent.add_data(
-                "technologies".to_string(),
-                serde_json::to_value(&technologies_found).unwrap(),
-            );
+            if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+                metadata.technologies = Some(technologies_found.clone());
+            }
             logger::println(
                 self.name(),
-                format!(
-                    "Technologies found: {}",
-                    technologies_found.join(", ").as_str()
-                ),
+                format!("Technologies found: {}", technologies_found.join(", ")),
             );
         }
 

@@ -10,10 +10,10 @@ pub fn get_ip_addr(domain: &str) -> Option<IpAddr> {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GeoInfo {
-    pub(crate) city: Option<String>,
-    pub(crate) country: Option<String>,
+    pub city: Option<String>,
+    pub country: Option<String>,
 }
 
 impl From<GeoInfo> for serde_json::Value {
