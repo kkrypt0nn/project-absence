@@ -7,6 +7,7 @@ const sidebars = {
       type: "category",
       label: "Installation",
       items: [
+        "installation/homebrew",
         "installation/docker",
         "installation/cargo",
         "installation/from-source",
@@ -23,19 +24,14 @@ const sidebars = {
       type: "category",
       label: "Modules",
       items: [
-        {
-          type: "category",
-          label: "Discovery",
-          items: [
-            "modules/discovery/emails",
-            "modules/discovery/endpoints",
-            "modules/discovery/files",
-            "modules/discovery/subdomains",
-          ],
-        },
         "modules/dns",
         "modules/domain_takeover",
+        "modules/emails",
+        "modules/endpoints",
+        "modules/files",
         "modules/infrastructure",
+        "modules/subdomains",
+        "modules/technologies",
       ],
       collapsed: true,
     },
