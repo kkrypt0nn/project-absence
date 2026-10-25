@@ -46,15 +46,30 @@ area/modules:
       - any-glob-to-any-file:
           - src/modules/**/*
 
-module/discovery:
+module/dns:
   - changed-files:
       - any-glob-to-any-file:
-          - src/modules/discovery/**/*
+          - src/modules/dns/**/*
 
 module/domain-takeover:
   - changed-files:
       - any-glob-to-any-file:
           - src/modules/domain_takeover/**/*
+
+module/emails:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/emails/**/*
+
+module/endpoints:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/endpoints/**/*
+
+module/files:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/files/**/*
 
 module/infrastructure:
   - changed-files:
@@ -65,3 +80,13 @@ module/scripting:
   - changed-files:
       - any-glob-to-any-file:
           - src/modules/scripting/**/*
+
+module/subdomains:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/subdomains/**/*
+
+module/technologies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/technologies/**/*

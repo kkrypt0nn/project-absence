@@ -3,13 +3,12 @@ use std::sync::Arc;
 use chrono::{DateTime, Duration, Utc};
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 use reqwest::header::USER_AGENT;
 
 use crate::{
     config,
-    database::node::{Node, Type},
+    database::node::{Node, NodeMetadata, Type},
     event_bus::Event,
     flags, helpers, logger,
     modules::Module,
@@ -69,68 +68,65 @@ impl Module for Runner {
                         if name_value == &domain.to_string() {
                             continue;
                         }
-                        if !session
-                            .get_state()
-                            .has_discovered_domain(name_value.to_string())
+                        if !session.get_state().try_discover_domain(name_value.clone()) {
+                            continue;
+                        }
+
+                        let now = Utc::now();
+                        let mut flags = flags::ZERO;
+
+                        // Check if the certificate has expired
+                        let has_expired = item.not_after < now;
+                        if ignore_expired && has_expired {
+                            continue;
+                        }
+                        if has_expired {
+                            flags |= flags::domain::HAS_EXPIRED;
+                        }
+
+                        // Check if the certificate has been created within the last 24 hours
+                        let is_recent = item.not_before <= now
+                            && item.not_before >= now - Duration::try_hours(24).unwrap();
+                        if !is_recent && recent_only {
+                            continue;
+                        }
+                        if is_recent {
+                            flags |= flags::domain::IS_RECENT;
+                        }
+
+                        logger::println(
+                            self.name(),
+                            format!(
+                                "Discovered '{name_value}' as a new subdomain{}{}",
+                                if has_expired {
+                                    " $[fg:red]$[effect:bold](Certificate expired, likely inactive)"
+                                } else {
+                                    ""
+                                },
+                                if is_recent {
+                                    " $[fg:blue]$[effect:bold](Active since less than 24 hours)"
+                                } else {
+                                    ""
+                                }
+                            ),
+                        );
+
+                        if let Some(parent) =
+                            session.get_database().search(Type::Domain, domain.clone())
                         {
-                            let now = Utc::now();
-                            let mut flags = flags::ZERO;
-
-                            // Check if the certificate has expired
-                            let has_expired = item.not_after < now;
-                            if ignore_expired && has_expired {
-                                continue;
-                            }
-                            if has_expired {
-                                flags |= flags::domain::HAS_EXPIRED;
-                            }
-
-                            // Check if the certificate has been created within the last 24 hours
-                            let is_recent = item.not_before <= now
-                                && item.not_before >= now - Duration::try_hours(24).unwrap();
-                            if !is_recent && recent_only {
-                                continue;
-                            }
-                            if is_recent {
-                                flags |= flags::domain::IS_RECENT;
-                            }
-
-                            logger::println(
-                                self.name(),
-                                format!(
-                                    "Discovered '{name_value}' as a new subdomain{}{}",
-                                    if has_expired {
-                                        " $[fg:red]$[effect:bold](Certificate expired, likely inactive)"
-                                    } else {
-                                        ""
-                                    },
-                                    if is_recent {
-                                        " $[fg:blue]$[effect:bold](Active since less than 24 hours)"
-                                    } else {
-                                        ""
-                                    }
-                                ),
-                            );
-
-                            if let Some(parent) =
-                                session.get_database().search(Type::Domain, domain.clone())
-                            {
-                                let mut new_node = Node::new(Type::Domain, name_value.clone());
-                                new_node.add_flag(flags);
-                                if let Some(ip_addr) = helpers::network::get_ip_addr(name_value) {
-                                    new_node.add_data(
-                                        String::from("ip"),
-                                        Value::String(ip_addr.to_string()),
-                                    );
+                            let mut new_node = Node::new(Type::Domain, name_value.clone());
+                            new_node.add_flag(flags);
+                            if let Some(ip_addr) = helpers::network::get_ip_addr(name_value) {
+                                if let NodeMetadata::Subdomain(metadata) = &mut new_node.metadata {
+                                    metadata.ip = Some(ip_addr.to_string());
                                     if let Some(geoinfo) = helpers::network::geolocate_ip(ip_addr) {
-                                        new_node.add_data(String::from("geoinfo"), geoinfo.into())
+                                        metadata.geoinfo = Some(geoinfo);
                                     }
                                 }
-                                parent.connect(new_node);
                             }
-                            session.get_state().discover_domain(name_value.to_string());
-                            session.publish(Event::DiscoveredDomain(name_value.clone()));
+                            parent.connect(new_node);
                         }
+                        session.publish(Event::DiscoveredDomain(name_value.clone()));
                     }
                 }
 

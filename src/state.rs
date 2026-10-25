@@ -1,4 +1,5 @@
 use std::{
+    collections::HashSet,
     sync::{
         Arc, RwLock,
         atomic::{AtomicUsize, Ordering},
@@ -19,10 +20,10 @@ pub struct State {
     verbose: bool,
     debug: bool,
 
-    discovered_domains: RwLock<Vec<String>>,
-    discovered_endpoints: RwLock<Vec<String>>,
-    discovered_emails: RwLock<Vec<String>>,
-    discovered_files: RwLock<Vec<String>>,
+    discovered_domains: RwLock<HashSet<String>>,
+    discovered_endpoints: RwLock<HashSet<String>>,
+    discovered_emails: RwLock<HashSet<String>>,
+    discovered_files: RwLock<HashSet<String>>,
 }
 
 impl State {
@@ -34,10 +35,10 @@ impl State {
             verbose,
             debug,
 
-            discovered_domains: RwLock::new(vec![]),
-            discovered_endpoints: RwLock::new(vec![]),
-            discovered_emails: RwLock::new(vec![]),
-            discovered_files: RwLock::new(vec![]),
+            discovered_domains: RwLock::new(HashSet::new()),
+            discovered_endpoints: RwLock::new(HashSet::new()),
+            discovered_emails: RwLock::new(HashSet::new()),
+            discovered_files: RwLock::new(HashSet::new()),
         }
     }
 
@@ -96,38 +97,19 @@ impl State {
         self.is_debug() || self.is_verbose()
     }
 
-    pub fn discover_domain(&self, domain: String) {
-        self.discovered_domains.write().unwrap().push(domain)
+    pub fn try_discover_domain(&self, domain: String) -> bool {
+        self.discovered_domains.write().unwrap().insert(domain)
     }
 
-    pub fn has_discovered_domain(&self, domain: String) -> bool {
-        self.discovered_domains.read().unwrap().contains(&domain)
+    pub fn try_discover_endpoint(&self, endpoint: String) -> bool {
+        self.discovered_endpoints.write().unwrap().insert(endpoint)
     }
 
-    pub fn discover_endpoint(&self, endpoint: String) {
-        self.discovered_endpoints.write().unwrap().push(endpoint)
+    pub fn try_discover_email(&self, email: String) -> bool {
+        self.discovered_emails.write().unwrap().insert(email)
     }
 
-    pub fn has_discovered_endpoint(&self, endpoint: String) -> bool {
-        self.discovered_endpoints
-            .read()
-            .unwrap()
-            .contains(&endpoint)
-    }
-
-    pub fn discover_email(&self, email: String) {
-        self.discovered_emails.write().unwrap().push(email)
-    }
-
-    pub fn has_discovered_email(&self, email: String) -> bool {
-        self.discovered_emails.read().unwrap().contains(&email)
-    }
-
-    pub fn discover_file(&self, file: String) {
-        self.discovered_files.write().unwrap().push(file)
-    }
-
-    pub fn has_discovered_file(&self, file: String) -> bool {
-        self.discovered_files.read().unwrap().contains(&file)
+    pub fn try_discover_file(&self, file: String) -> bool {
+        self.discovered_files.write().unwrap().insert(file)
     }
 }

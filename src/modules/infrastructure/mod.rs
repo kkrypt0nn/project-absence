@@ -1,6 +1,12 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{database::node::Type, event_bus::Event, logger, modules::Module, session::Session};
+use crate::{
+    database::node::{NodeMetadata, Type},
+    event_bus::Event,
+    logger,
+    modules::Module,
+    session::Session,
+};
 
 pub struct ModuleInfrastructure {
     cloud_provider: HashMap<&'static str, Vec<&'static str>>,
@@ -96,8 +102,7 @@ impl Module for ModuleInfrastructure {
 
         if let Some(tls_data) = &tls {
             for san in &tls_data.san {
-                if !session.get_state().has_discovered_domain(san.to_string()) {
-                    session.get_state().discover_domain(san.clone());
+                if session.get_state().try_discover_domain(san.clone()) {
                     session.publish(Event::DiscoveredDomain(san.clone()));
                 }
             }
@@ -106,8 +111,10 @@ impl Module for ModuleInfrastructure {
                 .get_database()
                 .search(Type::Domain, domain.to_string())
             {
-                parent.add_data("tls".to_string(), serde_json::to_value(tls_data).unwrap());
-                logger::println(self.name(), format!("Gathered TLS data for {domain}"));
+                if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+                    metadata.tls = Some(tls_data.clone());
+                    logger::println(self.name(), format!("Gathered TLS data for {domain}"));
+                }
             }
         }
 
@@ -115,10 +122,10 @@ impl Module for ModuleInfrastructure {
         let mut security_headers = HashMap::new();
         for (name, value) in headers {
             if self.interesting_headers.contains(&name.as_str()) {
-                interesting_headers.insert(name, value);
+                interesting_headers.insert(name.clone(), value.clone());
             }
             if self.security_headers.contains(&name.as_str()) {
-                security_headers.insert(name, value);
+                security_headers.insert(name.clone(), value.clone());
             }
         }
 
@@ -129,9 +136,11 @@ impl Module for ModuleInfrastructure {
                     "header" => headers
                         .iter()
                         .any(|(name, _)| name == value)
-                        .then_some(*provider),
+                        .then(|| provider.to_string()),
                     _ => headers.iter().find(|(name, _)| name == prefix).and_then(
-                        |(_, header_value)| header_value.contains(value).then_some(*provider),
+                        |(_, header_value)| {
+                            header_value.contains(value).then(|| provider.to_string())
+                        },
                     ),
                 }
             })
@@ -141,18 +150,12 @@ impl Module for ModuleInfrastructure {
             .get_database()
             .search(Type::Domain, domain.to_string())
         {
-            parent.add_data(
-                "cloud_provider".to_string(),
-                serde_json::to_value(cloud_provider).unwrap(),
-            );
-            parent.add_data(
-                "interesting_headers".to_string(),
-                serde_json::to_value(interesting_headers).unwrap(),
-            );
-            parent.add_data(
-                "security_headers".to_string(),
-                serde_json::to_value(security_headers).unwrap(),
-            );
+            if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+                metadata.cloud_provider = cloud_provider.clone();
+                metadata.interesting_headers = Some(interesting_headers);
+                metadata.security_headers = Some(security_headers);
+            }
+
             logger::println(
                 self.name(),
                 format!(

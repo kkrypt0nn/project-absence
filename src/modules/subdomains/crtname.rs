@@ -1,13 +1,12 @@
 use std::sync::Arc;
 
 use reqwest::StatusCode;
-use serde_json::Value;
 
 use reqwest::header::USER_AGENT;
 
 use crate::{
     config,
-    database::node::{Node, Type},
+    database::node::{Node, NodeMetadata, Type},
     event_bus::Event,
     helpers, logger,
     modules::Module,
@@ -70,9 +69,9 @@ impl Module for Runner {
                     if subdomain.is_empty() || subdomain == domain {
                         continue;
                     }
-                    if session
+                    if !session
                         .get_state()
-                        .has_discovered_domain(subdomain.to_string())
+                        .try_discover_domain(subdomain.to_string())
                     {
                         continue;
                     }
@@ -81,21 +80,20 @@ impl Module for Runner {
                         self.name(),
                         format!("Discovered '{subdomain}' as a new subdomain"),
                     );
-
                     if let Some(parent) =
                         session.get_database().search(Type::Domain, domain.clone())
                     {
                         let mut new_node = Node::new(Type::Domain, subdomain.to_string());
                         if let Some(ip_addr) = helpers::network::get_ip_addr(subdomain) {
-                            new_node
-                                .add_data(String::from("ip"), Value::String(ip_addr.to_string()));
-                            if let Some(geoinfo) = helpers::network::geolocate_ip(ip_addr) {
-                                new_node.add_data(String::from("geoinfo"), geoinfo.into())
+                            if let NodeMetadata::Subdomain(metadata) = &mut new_node.metadata {
+                                metadata.ip = Some(ip_addr.to_string());
+                                if let Some(geoinfo) = helpers::network::geolocate_ip(ip_addr) {
+                                    metadata.geoinfo = Some(geoinfo);
+                                }
                             }
                         }
                         parent.connect(new_node);
                     }
-                    session.get_state().discover_domain(subdomain.to_string());
                     session.publish(Event::DiscoveredDomain(subdomain.to_string()));
                 }
 

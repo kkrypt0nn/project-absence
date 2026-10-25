@@ -1,7 +1,11 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    database::node::Type, event_bus::Event, flags, logger, modules::Module, session::Session,
+    database::node::{NodeMetadata, Type},
+    event_bus::Event,
+    flags, logger,
+    modules::Module,
+    session::Session,
 };
 
 pub struct ModuleDomainTakeover {
@@ -61,8 +65,12 @@ impl Module for ModuleDomainTakeover {
         for (&platform, content) in &self.platforms {
             if body.contains(content) {
                 if let Some(parent) = session.get_database().search(Type::Domain, domain.clone()) {
-                    parent.add_data(String::from("possible_takeover"), platform.into());
                     parent.add_flag(flags::domain::POSSIBLE_TAKEOVER);
+
+                    if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+                        metadata.possible_takeover = Some(true);
+                        metadata.takeover_platform = Some(platform.to_string());
+                    }
                 }
                 logger::println(
                     self.name_with_platform(platform),

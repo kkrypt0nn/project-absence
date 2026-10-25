@@ -5,12 +5,11 @@ use x509_parser::parse_x509_certificate;
 
 use crate::{
     event_bus::{self, Event},
-    helpers, logger,
+    helpers::{self, tls},
+    logger,
     modules::Module,
     session::Session,
 };
-
-mod tls;
 
 #[derive(Clone, Eq, Hash, PartialEq)]
 pub struct HttpResponse {
