@@ -38,6 +38,9 @@ pub struct Args {
     #[arg(short = 'm', long, value_delimiter = ',')]
     pub modules: Option<Vec<String>>,
 
+    #[arg(long = "set", value_name = "KEY=VALUE", action = clap::ArgAction::Append)]
+    pub overrides: Vec<String>,
+
     /// The file path of the Lua script to load
     #[arg(short = 's', long)]
     pub script: Option<String>,

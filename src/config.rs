@@ -77,7 +77,7 @@ pub fn create_file_if_not_existing() {
 }
 
 /// The config.toml file structure
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub domain_takeover: Option<DomainTakeoverConfig>,
     pub dns: Option<DnsConfig>,
@@ -194,4 +194,61 @@ pub struct SubdomainsCrtNameConfig;
 pub struct TechnologiesConfig {
     /// Whether the module is enabled
     pub enabled: bool,
+}
+
+impl Config {
+    pub fn from_default_with_overrides(overrides: &[String]) -> Result<Self, String> {
+        let mut default_config_toml: toml::Value = toml::from_str(DEFAULT_CONFIG)
+            .map_err(|e| format!("Failed to parse default config: {e}"))?;
+
+        for override_value in overrides {
+            let (path, raw) = override_value.split_once('=').ok_or_else(|| {
+                format!("Invalid override '{override_value}': expected KEY=VALUE")
+            })?;
+
+            // Parse the final key and the parents up to it, making sure it's valid as well
+            let keys: Vec<&str> = path.split('.').collect();
+            let (final_key, parent_keys) = keys
+                .split_last()
+                .ok_or_else(|| format!("Invalid config path '{path}'"))?;
+
+            let mut current_toml = &mut default_config_toml;
+
+            // Go to the parent of the key that gets overwritten
+            for key in parent_keys {
+                current_toml = current_toml
+                    .get_mut(*key)
+                    .ok_or_else(|| format!("Unknown config path '{path}'"))?;
+            }
+
+            let table = current_toml
+                .as_table_mut()
+                .ok_or_else(|| format!("Unable to extract table at: '{path}'"))?;
+
+            // Get the existing value of the default config to help knowing the type of the override.
+            // This allows to use for example `--set dns.interesting_keywords.mx=mailsec` and still be valid.
+            let existing_value = table
+                .get(*final_key)
+                .ok_or_else(|| format!("Unknown config key '{path}'"))?;
+            let new_value = if raw.contains(',') {
+                toml::Value::Array(
+                    raw.split(',')
+                        .map(|item| toml::Value::String(item.trim().to_string()))
+                        .collect(),
+                )
+            } else if existing_value.is_array() {
+                toml::Value::Array(vec![toml::Value::String(raw.to_string())])
+            } else if raw == "true" || raw == "false" {
+                toml::Value::Boolean(raw == "true")
+            } else {
+                toml::Value::String(raw.to_string())
+            };
+
+            table.insert(final_key.to_string(), new_value);
+        }
+
+        default_config_toml
+            .try_into()
+            .map_err(|e| format!("Failed to deserialize config: {e}"))
+    }
 }

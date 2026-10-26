@@ -29,7 +29,15 @@ fn main() {
         process::exit(0);
     }
 
-    let config = if args.modules.is_none() {
+    let config = if args.modules.is_some() {
+        match config::Config::from_default_with_overrides(&args.overrides) {
+            Ok(config) => config,
+            Err(e) => {
+                logger::error("setup", e);
+                process::exit(1);
+            }
+        }
+    } else {
         config::create_file_if_not_existing();
         match args.parse_config() {
             Ok(config) => config,
@@ -38,8 +46,6 @@ fn main() {
                 process::exit(1);
             }
         }
-    } else {
-        config::Config::default()
     };
 
     let session = session::Session::new(args, config);
