@@ -96,7 +96,6 @@ impl Runner {
                 .send()
             {
                 let html = response.text().unwrap_or_default();
-                println!("{html}");
                 let re = Regex::new(&format!(
                     r#"href="(https?://[^"]*{}[^"]*\.{}[^"]*)""#,
                     regex::escape(&domain),
