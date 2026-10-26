@@ -77,7 +77,7 @@ pub fn create_file_if_not_existing() {
 }
 
 /// The config.toml file structure
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct Config {
     pub domain_takeover: Option<DomainTakeoverConfig>,
     pub dns: Option<DnsConfig>,

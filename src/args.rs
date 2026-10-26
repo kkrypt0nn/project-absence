@@ -34,6 +34,10 @@ pub struct Args {
     #[arg(short = 'C', long, default_value_t = false)]
     pub clipboard: bool,
 
+    /// Modules and runners to execute. If omitted, use the config file
+    #[arg(short = 'm', long, value_delimiter = ',')]
+    pub modules: Option<Vec<String>>,
+
     /// The file path of the Lua script to load
     #[arg(short = 's', long)]
     pub script: Option<String>,

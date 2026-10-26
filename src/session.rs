@@ -212,6 +212,95 @@ impl Session {
             self.register_module(lua_module);
         }
 
+        if let Some(selected_modules) = &self.args.modules {
+            for name in selected_modules {
+                match name.as_str() {
+                    "dns" => {
+                        if let Some(cfg) = &self.config.dns {
+                            self.register_module(modules::dns::ModuleDns::new(cfg.clone()));
+                        }
+                    }
+                    "domain_takeover" => {
+                        self.register_module(
+                            modules::domain_takeover::ModuleDomainTakeover::default(),
+                        );
+                    }
+                    "emails:dork" => {
+                        let cfg = self
+                            .config
+                            .emails
+                            .as_ref()
+                            .and_then(|c| c.dork.clone())
+                            .unwrap_or_default();
+
+                        self.register_module(modules::emails::dork::Runner::new(cfg));
+                    }
+                    "endpoints:wayback_machine" => {
+                        let cfg = self
+                            .config
+                            .endpoints
+                            .as_ref()
+                            .and_then(|c| c.wayback_machine.clone())
+                            .unwrap_or_default();
+
+                        self.register_module(modules::endpoints::wayback_machine::Runner::new(cfg));
+                    }
+                    "files:dork" => {
+                        let cfg = self
+                            .config
+                            .files
+                            .as_ref()
+                            .and_then(|c| c.dork.clone())
+                            .unwrap_or_default();
+
+                        self.register_module(modules::files::dork::Runner::new(cfg));
+                    }
+                    "infrastructure" => {
+                        self.register_module(
+                            modules::infrastructure::ModuleInfrastructure::default(),
+                        );
+                    }
+                    "subdomains:crtname" => {
+                        let cfg = self
+                            .config
+                            .subdomains
+                            .as_ref()
+                            .and_then(|c| c.crtname.clone())
+                            .unwrap_or_default();
+
+                        self.register_module(modules::subdomains::crtname::Runner::new(cfg));
+                    }
+                    "subdomains:crtsh" => {
+                        let cfg = self
+                            .config
+                            .subdomains
+                            .as_ref()
+                            .and_then(|c| c.crtsh.clone())
+                            .unwrap_or_default();
+
+                        self.register_module(modules::subdomains::crtsh::Runner::new(cfg));
+                    }
+                    "subdomains:dork" => {
+                        let cfg = self
+                            .config
+                            .subdomains
+                            .as_ref()
+                            .and_then(|c| c.dork.clone())
+                            .unwrap_or_default();
+
+                        self.register_module(modules::subdomains::dork::Runner::new(cfg));
+                    }
+                    "technologies" => {
+                        self.register_module(modules::technologies::ModuleTechnologies::default());
+                    }
+                    _ => {
+                        logger::error("setup", format!("Unknown module '{name}'"));
+                    }
+                }
+            }
+            return;
+        }
+
         if let Some(endpoints_cfg) = &self.config.endpoints {
             let enabled_runners = endpoints_cfg.enabled_runners.as_deref().unwrap_or_default();
             let mut runners: Vec<Box<dyn Module>> = vec![];
