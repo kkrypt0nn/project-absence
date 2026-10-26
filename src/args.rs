@@ -38,8 +38,8 @@ pub struct Args {
     #[arg(short = 'm', long, value_delimiter = ',')]
     pub modules: Option<Vec<String>>,
 
-    /// Sets the overrides for the modules that are ran with `--modules`. Ignore when using config file
-    #[arg(long = "set", value_name = "KEY=VALUE", action = clap::ArgAction::Append)]
+    /// Sets the overrides for the modules being ran
+    #[arg(long = "override", value_name = "KEY=VALUE", action = clap::ArgAction::Append)]
     pub overrides: Vec<String>,
 
     /// The file path of the Lua script to load
