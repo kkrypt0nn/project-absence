@@ -104,6 +104,9 @@
 - name: "kind/deprecation"
   color: "#ff9f43"
   description: "Feature or API is being deprecated"
+- name: "kind/security"
+  color: "#3145fe"
+  description: "Related to the security of the project"
 
 # Priority
 - name: "priority/critical"

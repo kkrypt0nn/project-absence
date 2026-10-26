@@ -45,13 +45,14 @@ jobs:
           sed -i -E 's/^version = ".*"/version = "'"${VERSION_NO_V}"'"/' Cargo.toml
           cd website
           npm version "${VERSION_NO_V}" --no-git-tag-version
+          echo "${VERSION_NO_V}" > ./static/latest-version
           cd ..
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if ! git diff --quiet; then
-            git add Cargo.toml website/package.json website/package-lock.json
-            git commit -m "chore: Update version to ${VERSION_NO_V}"
+            git add Cargo.toml website/package.json website/package-lock.json website/static/latest-version
+            git commit -m "chore: update version to ${VERSION_NO_V}"
             git push origin HEAD
           fi
         env:
