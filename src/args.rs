@@ -34,10 +34,11 @@ pub struct Args {
     #[arg(short = 'C', long, default_value_t = false)]
     pub clipboard: bool,
 
-    /// Modules and runners to execute. If omitted, use the config file
+    /// Modules and runners to execute. If omitted, it uses the config file
     #[arg(short = 'm', long, value_delimiter = ',')]
     pub modules: Option<Vec<String>>,
 
+    /// Sets the overrides for the modules that are ran with `--modules`. Ignore when using config file
     #[arg(long = "set", value_name = "KEY=VALUE", action = clap::ArgAction::Append)]
     pub overrides: Vec<String>,
 

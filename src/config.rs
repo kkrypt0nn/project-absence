@@ -197,9 +197,13 @@ pub struct TechnologiesConfig {
 }
 
 impl Config {
-    pub fn from_default_with_overrides(overrides: &[String]) -> Result<Self, String> {
-        let mut default_config_toml: toml::Value = toml::from_str(DEFAULT_CONFIG)
-            .map_err(|e| format!("Failed to parse default config: {e}"))?;
+    pub fn from_default() -> Result<Self, String> {
+        toml::from_str(DEFAULT_CONFIG).map_err(|e| format!("Failed to parse default config: {e}"))
+    }
+
+    pub fn apply_overrides(config: Self, overrides: &[String]) -> Result<Self, String> {
+        let mut config_toml = toml::Value::try_from(config)
+            .map_err(|e| format!("Failed to serialize config: {e}"))?;
 
         for override_value in overrides {
             let (path, raw) = override_value.split_once('=').ok_or_else(|| {
@@ -212,7 +216,7 @@ impl Config {
                 .split_last()
                 .ok_or_else(|| format!("Invalid config path '{path}'"))?;
 
-            let mut current_toml = &mut default_config_toml;
+            let mut current_toml = &mut config_toml;
 
             // Go to the parent of the key that gets overwritten
             for key in parent_keys {
@@ -247,7 +251,7 @@ impl Config {
             table.insert(final_key.to_string(), new_value);
         }
 
-        default_config_toml
+        config_toml
             .try_into()
             .map_err(|e| format!("Failed to deserialize config: {e}"))
     }
