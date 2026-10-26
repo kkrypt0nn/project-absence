@@ -7,13 +7,15 @@ There are command line argument (`project-absence --help`) that can be passed di
 
 Each argument has a long variant prefixed with `--` and a short variant prefixed with `-`. When an argument has **no** default value, it is **required**.
 
-| Argument          | Description                                                                                           | Default                  |
-| ----------------- | ----------------------------------------------------------------------------------------------------- | ------------------------ |
-| `domain` / `d`    | The domain to run the tool on.                                                                        |                          |
-| `config` / `c`    | Path to the [configuration file](/docs/usage/config).                                                 | `~/.absence/config.toml` |
-| `output` / `o`    | The path of where the output will be saved to.                                                        | `~/.absence`             |
-| `clipboard` / `C` | Whether to copy the resulting JSON database to the clipboard.                                         | `false`                  |
-| `script` / `s`    | The file path of the Lua script to load.                                                              |                          |
-| `version` / `V`   | Display the version of the tool.                                                                      | `false`                  |
-| `debug` / `D`     | Whether to print the database at the end of execution in a tree format and some other debugging data. | `false`                  |
-| `verbose` / `v`   | Whether to print some verbose data.                                                                   | `false`                  |
+| Argument          | Description                                                                                                                                                                                                   | Default                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `domain` / `d`    | The domain to run the tool on.                                                                                                                                                                                |                          |
+| `config` / `c`    | Path to the [configuration file](/docs/usage/config).                                                                                                                                                         | `~/.absence/config.toml` |
+| `output` / `o`    | The path of where the output will be saved to.                                                                                                                                                                | `~/.absence`             |
+| `clipboard` / `C` | Whether to copy the resulting JSON database to the clipboard.                                                                                                                                                 | `false`                  |
+| `modules` / `m`   | Modules and runners to execute. If omitted it uses the config file. The format is for example `subdomains:crtname`. Modules ran with this method will **always** inherit from the default configuration TOML. |                          |
+| `override`        | Sets a config value **override** (it **must** be set in the base configuration) which will always take precedence                                                                                             |                          |
+| `script` / `s`    | The file path of the Lua script to load.                                                                                                                                                                      |                          |
+| `version` / `V`   | Display the version of the tool.                                                                                                                                                                              | `false`                  |
+| `debug` / `D`     | Whether to print the database at the end of execution in a tree format and some other debugging data.                                                                                                         | `false`                  |
+| `verbose` / `v`   | Whether to print some verbose data.                                                                                                                                                                           | `false`                  |

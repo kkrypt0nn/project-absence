@@ -19,7 +19,6 @@ mod session;
 mod state;
 
 fn main() {
-    config::create_file_if_not_existing();
     LOGGER.lock().unwrap().println(format!(
         "Project Absence v{} $[fg:gray](built for {OS} on {ARCH})$[effect:reset]",
         env!("CARGO_PKG_VERSION")
@@ -29,13 +28,36 @@ fn main() {
     if args.version {
         process::exit(0);
     }
-    let config = match args.parse_config() {
-        Ok(config) => config,
-        Err(e) => {
-            logger::error("setup", e);
-            process::exit(1);
+
+    let mut config = if args.modules.is_some() {
+        match config::Config::from_default() {
+            Ok(config) => config,
+            Err(e) => {
+                logger::error("setup", e);
+                process::exit(1);
+            }
+        }
+    } else {
+        config::create_file_if_not_existing();
+
+        match args.parse_config() {
+            Ok(config) => config,
+            Err(e) => {
+                logger::error("setup", e);
+                process::exit(1);
+            }
         }
     };
+
+    if !args.overrides.is_empty() {
+        config = match config::Config::apply_overrides(config, &args.overrides) {
+            Ok(config) => config,
+            Err(e) => {
+                logger::error("setup", e);
+                process::exit(1);
+            }
+        };
+    }
 
     let session = session::Session::new(args, config);
     session.register_config_modules();
