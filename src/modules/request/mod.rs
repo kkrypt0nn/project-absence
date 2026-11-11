@@ -1,7 +1,7 @@
 use std::{fmt, sync::Arc};
 
 use reqwest::{header::USER_AGENT, tls::TlsInfo};
-use x509_parser::parse_x509_certificate;
+use x509_certificate::CapturedX509Certificate;
 
 use crate::{
     event_bus::{self, Event},
@@ -85,9 +85,9 @@ impl Module for ModuleRequest {
             .collect();
         let tls = response.extensions().get::<TlsInfo>().and_then(|tls_info| {
             tls_info.peer_certificate().and_then(|der| {
-                parse_x509_certificate(der)
+                CapturedX509Certificate::from_der(der)
                     .ok()
-                    .map(|(_, cert)| tls::TlsData::from_cert(&cert, tls_info.version()))
+                    .map(|cert| tls::TlsData::from_cert(&cert, tls_info.version()))
             })
         });
         let body = response.text().unwrap_or_default();

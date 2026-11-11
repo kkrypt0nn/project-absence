@@ -1,67 +1,76 @@
-use chrono::{TimeZone, Utc};
+use chrono::Utc;
+use der_parser::parse_der;
 use reqwest::tls::Version;
 use serde::{Deserialize, Serialize};
-use x509_parser::prelude::{GeneralName, X509Certificate};
+use x509_certificate::CapturedX509Certificate;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub struct TlsData {
     pub version: String,
-    pub serial: String,
+
     pub subject: String,
     pub issuer: String,
+
+    pub fingerprint: String,
+
     pub not_before: String,
     pub not_after: String,
     pub expires_in_seconds: i64,
-    pub key_type: String,
+
+    pub signature_algorithm: String,
+    pub public_key_algorithm: String,
+
     pub san: Vec<String>,
 }
 
 impl TlsData {
-    pub fn from_cert(cert: &X509Certificate, version: Option<Version>) -> Self {
-        let not_before = Utc
-            .timestamp_opt(cert.validity.not_before.timestamp(), 0)
-            .unwrap();
-        let not_after = Utc
-            .timestamp_opt(cert.validity.not_after.timestamp(), 0)
-            .unwrap();
+    pub fn from_cert(cert: &CapturedX509Certificate, version: Option<Version>) -> Self {
+        let not_before = cert.validity_not_before();
+        let not_after = cert.validity_not_after();
         let expires_in_seconds = (not_after - Utc::now()).num_seconds();
 
-        let san = match cert.subject_alternative_name() {
-            Ok(Some(extension)) => extension
-                .value
-                .general_names
-                .iter()
-                .map(|n| match n {
-                    GeneralName::DNSName(s) => s.to_string(),
-                    _ => n.to_string(),
-                })
-                .collect(),
-            _ => vec![],
-        };
+        let fingerprint = cert
+            .sha256_fingerprint()
+            .map(|digest| {
+                digest
+                    .as_ref()
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect::<String>()
+            })
+            .unwrap_or_else(|_| "Unknown".to_string());
+
+        let public_key_algorithm = cert
+            .key_algorithm()
+            .map(|algorithm| format!("{algorithm:?}"))
+            .unwrap_or_else(|| "Unknown".into());
+
+        let signature_algorithm = cert
+            .signature_signature_algorithm()
+            .map(|algorithm| format!("{algorithm:?}"))
+            .unwrap_or_else(|| "Unknown".into());
 
         Self {
             version: tls_version(version),
-            serial: cert.raw_serial_as_string(),
-            subject: cert.subject().to_string(),
-            issuer: cert.issuer().to_string(),
-            not_before: not_before.to_string(),
-            not_after: not_after.to_string(),
-            expires_in_seconds,
-            key_type: key_type(cert),
-            san,
-        }
-    }
-}
 
-// https://oidref.com/1.2.840
-// https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/ns-wincrypt-crypt_algorithm_identifier
-fn key_type(cert: &X509Certificate) -> String {
-    let oid = &cert.public_key().algorithm.algorithm;
-    match oid.to_string().as_str() {
-        "1.2.840.113549.1.1.1" => "RSA".to_string(),
-        "1.2.840.10045.2.1" => "EC".to_string(),
-        "1.2.840.10040.4.1" => "DSA".to_string(),
-        _ => format!("Unknown({oid})"),
+            subject: cert
+                .subject_common_name()
+                .unwrap_or_else(|| format!("{:?}", cert.subject_name())),
+            issuer: cert
+                .issuer_common_name()
+                .unwrap_or_else(|| format!("{:?}", cert.issuer_name())),
+
+            fingerprint,
+
+            not_before: not_before.to_rfc3339(),
+            not_after: not_after.to_rfc3339(),
+            expires_in_seconds,
+
+            public_key_algorithm,
+            signature_algorithm,
+
+            san: extract_san(cert),
+        }
     }
 }
 
@@ -74,4 +83,35 @@ fn tls_version(version: Option<Version>) -> String {
         Some(_) => "Unknown".to_string(),
         None => "Unknown".to_string(),
     }
+}
+
+pub fn extract_san(cert: &CapturedX509Certificate) -> Vec<String> {
+    let mut san = vec![];
+
+    for ext in cert.iter_extensions() {
+        if ext.id.to_string() != "2.5.29.17" {
+            continue;
+        }
+        let Some(bytes) = ext.value.as_slice() else {
+            continue;
+        };
+        let Ok((_, sequence)) = parse_der(bytes) else {
+            continue;
+        };
+        let Ok(names) = sequence.as_sequence() else {
+            continue;
+        };
+
+        for name in names {
+            if name.header.tag().0 != 2 {
+                continue;
+            }
+
+            if let der_parser::ber::BerObjectContent::Unknown(any) = &name.content {
+                san.push(String::from_utf8_lossy(any.data).into_owned());
+            }
+        }
+    }
+
+    san
 }
