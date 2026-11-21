@@ -111,7 +111,7 @@ impl Module for ModuleInfrastructure {
                 .get_database()
                 .search(Type::Domain, domain.to_string())
             {
-                if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+                if let NodeMetadata::Domain(metadata) = &mut parent.metadata {
                     metadata.tls = Some(tls_data.clone());
                     logger::println(self.name(), format!("Gathered TLS data for {domain}"));
                 }
@@ -150,7 +150,7 @@ impl Module for ModuleInfrastructure {
             .get_database()
             .search(Type::Domain, domain.to_string())
         {
-            if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+            if let NodeMetadata::Domain(metadata) = &mut parent.metadata {
                 metadata.cloud_provider = cloud_provider.clone();
                 metadata.interesting_headers = Some(interesting_headers);
                 metadata.security_headers = Some(security_headers);

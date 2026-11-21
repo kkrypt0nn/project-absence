@@ -117,7 +117,7 @@ impl Module for ModuleDns {
             .get_database()
             .search(crate::database::node::Type::Domain, domain.to_string())
         {
-            if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+            if let NodeMetadata::Domain(metadata) = &mut parent.metadata {
                 metadata.dns = Some(dns_data);
                 logger::println(self.name(), format!("Stored DNS data for {domain}"));
             }

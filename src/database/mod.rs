@@ -13,7 +13,10 @@ pub struct Database {
 impl Database {
     pub fn new(mut root: Node) -> Self {
         if root.r#type == Type::Domain {
-            root.metadata = NodeMetadata::Domain(DomainData { is_root: true });
+            root.metadata = NodeMetadata::Domain(DomainData {
+                is_root: true,
+                ..Default::default()
+            });
         }
         Self { root }
     }

@@ -117,7 +117,7 @@ impl Module for Runner {
                             let mut new_node = Node::new(Type::Domain, name_value.clone());
                             new_node.add_flag(flags);
                             if let Some(ip_addr) = helpers::network::get_ip_addr(name_value) {
-                                if let NodeMetadata::Subdomain(metadata) = &mut new_node.metadata {
+                                if let NodeMetadata::Domain(metadata) = &mut new_node.metadata {
                                     metadata.ip = Some(ip_addr.to_string());
                                     if let Some(geoinfo) = helpers::network::geolocate_ip(ip_addr) {
                                         metadata.geoinfo = Some(geoinfo);

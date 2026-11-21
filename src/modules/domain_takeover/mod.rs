@@ -67,7 +67,7 @@ impl Module for ModuleDomainTakeover {
                 if let Some(parent) = session.get_database().search(Type::Domain, domain.clone()) {
                     parent.add_flag(flags::domain::POSSIBLE_TAKEOVER);
 
-                    if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+                    if let NodeMetadata::Domain(metadata) = &mut parent.metadata {
                         metadata.possible_takeover = Some(true);
                         metadata.takeover_platform = Some(platform.to_string());
                     }
