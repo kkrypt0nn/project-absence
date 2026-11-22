@@ -64,7 +64,7 @@ impl Module for ModuleTechnologies {
             .get_database()
             .search(Type::Domain, domain.to_string())
         {
-            if let NodeMetadata::Subdomain(metadata) = &mut parent.metadata {
+            if let NodeMetadata::Domain(metadata) = &mut parent.metadata {
                 metadata.technologies = Some(technologies_found.clone());
             }
             logger::println(

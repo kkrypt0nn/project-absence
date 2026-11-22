@@ -1,5 +1,6 @@
 pub mod dns;
 pub mod domain;
+pub mod tls;
 
 pub const ZERO: usize = 0;
 

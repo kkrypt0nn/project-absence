@@ -51,6 +51,10 @@ recent_only = false
 
 [technologies]
 enabled = true
+
+[tls]
+enabled = true
+danger_accept_invalid_certs = false
 "#;
 
 pub fn create_file_if_not_existing() {
@@ -87,6 +91,7 @@ pub struct Config {
     pub infrastructure: Option<InfrastructureConfig>,
     pub subdomains: Option<SubdomainsConfig>,
     pub technologies: Option<TechnologiesConfig>,
+    pub tls: Option<TlsConfig>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -194,6 +199,14 @@ pub struct SubdomainsCrtNameConfig;
 pub struct TechnologiesConfig {
     /// Whether the module is enabled
     pub enabled: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct TlsConfig {
+    /// Whether the module is enabled
+    pub enabled: bool,
+    /// Whether to connect to domains with invalid certificates (expired, not trusted, etc.)
+    pub danger_accept_invalid_certs: Option<bool>,
 }
 
 impl Config {

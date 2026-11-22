@@ -41,6 +41,21 @@ impl Session {
         let domain_clone = args.clone().domain;
         let is_verbose = args.verbose;
         let is_debug = args.debug;
+        let mut client_builder = ClientBuilder::new().tls_info(true);
+
+        if config
+            .tls
+            .as_ref()
+            .is_some_and(|tls| tls.enabled && tls.danger_accept_invalid_certs == Some(true))
+        {
+            logger::warn(
+                "setup(tls)",
+                "TLS certificate validation is disabled. Invalid TLS certificates will be accepted which can expose connections to man-in-the-middle attacks.",
+            );
+
+            client_builder = client_builder.danger_accept_invalid_certs(true);
+        }
+
         Arc::new(Self {
             args,
             bus: EventBus::default(),
@@ -50,10 +65,7 @@ impl Session {
                 domain_clone,
             ))),
             state: state::State::new(is_verbose, is_debug),
-            http_client: ClientBuilder::new()
-                .tls_info(true)
-                .build()
-                .expect("Client::new()"),
+            http_client: client_builder.build().expect("Client::new()"),
             shutdown: Semaphore::new(0),
         })
     }
@@ -293,6 +305,9 @@ impl Session {
                     "technologies" => {
                         self.register_module(modules::technologies::ModuleTechnologies::default());
                     }
+                    "tls" => {
+                        self.register_module(modules::tls::ModuleTls::default());
+                    }
                     _ => {
                         logger::error("setup", format!("Unknown module '{name}'"));
                     }
@@ -301,21 +316,10 @@ impl Session {
             return;
         }
 
-        if let Some(endpoints_cfg) = &self.config.endpoints {
-            let enabled_runners = endpoints_cfg.enabled_runners.as_deref().unwrap_or_default();
-            let mut runners: Vec<Box<dyn Module>> = vec![];
-
-            add_runner!(
-                enabled_runners,
-                runners,
-                "wayback_machine",
-                &endpoints_cfg.wayback_machine,
-                modules::endpoints::wayback_machine::Runner::new
-            );
-
-            if !runners.is_empty() {
-                self.register_module(modules::endpoints::EndpointDiscoveryModule::new(runners));
-            }
+        if let Some(dns_cfg) = &self.config.dns
+            && dns_cfg.enabled
+        {
+            self.register_module(modules::dns::ModuleDns::new(dns_cfg.clone()));
         }
 
         if let Some(domain_takeover_cfg) = &self.config.domain_takeover
@@ -339,6 +343,46 @@ impl Session {
             if !runners.is_empty() {
                 self.register_module(modules::emails::EmailDiscoveryModule::new(runners));
             }
+        }
+
+        if let Some(endpoints_cfg) = &self.config.endpoints {
+            let enabled_runners = endpoints_cfg.enabled_runners.as_deref().unwrap_or_default();
+            let mut runners: Vec<Box<dyn Module>> = vec![];
+
+            add_runner!(
+                enabled_runners,
+                runners,
+                "wayback_machine",
+                &endpoints_cfg.wayback_machine,
+                modules::endpoints::wayback_machine::Runner::new
+            );
+
+            if !runners.is_empty() {
+                self.register_module(modules::endpoints::EndpointDiscoveryModule::new(runners));
+            }
+        }
+
+        if let Some(files_cfg) = &self.config.files {
+            let enabled_runners = files_cfg.enabled_runners.as_deref().unwrap_or_default();
+            let mut runners: Vec<Box<dyn Module>> = vec![];
+
+            add_runner!(
+                enabled_runners,
+                runners,
+                "dork",
+                &files_cfg.dork,
+                modules::files::dork::Runner::new
+            );
+
+            if !runners.is_empty() {
+                self.register_module(modules::files::FileDiscoveryModule::new(runners));
+            }
+        }
+
+        if let Some(infrastructure_cfg) = &self.config.infrastructure
+            && infrastructure_cfg.enabled
+        {
+            self.register_module(modules::infrastructure::ModuleInfrastructure::default());
         }
 
         if let Some(subdomains_cfg) = &self.config.subdomains {
@@ -375,39 +419,16 @@ impl Session {
             }
         }
 
-        if let Some(infrastructure_cfg) = &self.config.infrastructure
-            && infrastructure_cfg.enabled
-        {
-            self.register_module(modules::infrastructure::ModuleInfrastructure::default());
-        }
-
-        if let Some(dns_cfg) = &self.config.dns
-            && dns_cfg.enabled
-        {
-            self.register_module(modules::dns::ModuleDns::new(dns_cfg.clone()));
-        }
-
         if let Some(technologies_cfg) = &self.config.technologies
             && technologies_cfg.enabled
         {
             self.register_module(modules::technologies::ModuleTechnologies::default());
         }
 
-        if let Some(files_cfg) = &self.config.files {
-            let enabled_runners = files_cfg.enabled_runners.as_deref().unwrap_or_default();
-            let mut runners: Vec<Box<dyn Module>> = vec![];
-
-            add_runner!(
-                enabled_runners,
-                runners,
-                "dork",
-                &files_cfg.dork,
-                modules::files::dork::Runner::new
-            );
-
-            if !runners.is_empty() {
-                self.register_module(modules::files::FileDiscoveryModule::new(runners));
-            }
+        if let Some(tls_cfg) = &self.config.tls
+            && tls_cfg.enabled
+        {
+            self.register_module(modules::tls::ModuleTls::default());
         }
     }
 
@@ -444,6 +465,9 @@ impl Session {
                 }
             });
         }
+
+        self.state
+            .try_discover_domain(self.get_args().domain.clone());
 
         self.publish(event_bus::Event::Ready);
         self.publish(event_bus::Event::DiscoveredDomain(

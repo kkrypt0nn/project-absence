@@ -65,8 +65,8 @@ impl Module for Runner {
                     .map_err(|_| "Failed to read the body of crt.name")?;
 
                 for line in body.lines() {
-                    let subdomain = line.trim();
-                    if subdomain.is_empty() || subdomain == domain {
+                    let subdomain = line.trim().to_lowercase();
+                    if subdomain.is_empty() || subdomain == *domain {
                         continue;
                     }
                     if !session
@@ -84,8 +84,8 @@ impl Module for Runner {
                         session.get_database().search(Type::Domain, domain.clone())
                     {
                         let mut new_node = Node::new(Type::Domain, subdomain.to_string());
-                        if let Some(ip_addr) = helpers::network::get_ip_addr(subdomain) {
-                            if let NodeMetadata::Subdomain(metadata) = &mut new_node.metadata {
+                        if let Some(ip_addr) = helpers::network::get_ip_addr(&subdomain) {
+                            if let NodeMetadata::Domain(metadata) = &mut new_node.metadata {
                                 metadata.ip = Some(ip_addr.to_string());
                                 if let Some(geoinfo) = helpers::network::geolocate_ip(ip_addr) {
                                     metadata.geoinfo = Some(geoinfo);

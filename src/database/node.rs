@@ -52,10 +52,6 @@ impl Serialize for Type {
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct DomainData {
     pub is_root: bool,
-}
-
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct SubdomainData {
     pub dns: Option<HashMap<String, Vec<DnsRecordEntry>>>,
     pub possible_takeover: Option<bool>,
     pub takeover_platform: Option<String>,
@@ -72,7 +68,6 @@ pub struct SubdomainData {
 #[serde(tag = "kind", content = "metadata", rename_all = "lowercase")]
 pub enum NodeMetadata {
     Domain(DomainData),
-    Subdomain(SubdomainData),
     Endpoint,
     Email,
     File,
@@ -104,7 +99,7 @@ impl fmt::Display for Node {
 impl Node {
     pub fn new(r#type: Type, value: String) -> Self {
         let metadata = match r#type {
-            Type::Domain => NodeMetadata::Subdomain(SubdomainData::default()),
+            Type::Domain => NodeMetadata::Domain(DomainData::default()),
             Type::Endpoint => NodeMetadata::Endpoint,
             Type::Email => NodeMetadata::Email,
             Type::File => NodeMetadata::File,
@@ -196,7 +191,7 @@ impl Node {
                     format!(
                         "✅ (Platform: `{}`)",
                         match &self.metadata {
-                            NodeMetadata::Subdomain(metadata) =>
+                            NodeMetadata::Domain(metadata) =>
                                 metadata.takeover_platform.as_deref().unwrap_or("Not set"),
                             _ => "Not set",
                         }
@@ -233,14 +228,14 @@ impl Node {
 
         match &self.metadata {
             NodeMetadata::Domain(metadata) => {
-                write!(
-                    &mut metadata_markdown,
-                    "#### Is root\n\n{}\n\n",
-                    metadata.is_root,
-                )
-                .unwrap();
-            }
-            NodeMetadata::Subdomain(metadata) => {
+                if metadata.is_root {
+                    write!(
+                        &mut metadata_markdown,
+                        "#### Is root\n\n{}\n\n",
+                        metadata.is_root,
+                    )
+                    .unwrap();
+                }
                 if let Some(dns) = &metadata.dns {
                     write!(
                         &mut metadata_markdown,

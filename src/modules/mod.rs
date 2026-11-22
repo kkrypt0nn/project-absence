@@ -13,6 +13,7 @@ pub mod request;
 pub mod scripting;
 pub mod subdomains;
 pub mod technologies;
+pub mod tls;
 
 pub trait Module: Send + Sync {
     fn name(&self) -> &'static str;

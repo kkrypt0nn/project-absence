@@ -32,6 +32,7 @@ const sidebars = {
         "modules/infrastructure",
         "modules/subdomains",
         "modules/technologies",
+        "modules/tls",
       ],
       collapsed: true,
     },
