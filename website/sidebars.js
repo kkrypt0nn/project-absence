@@ -29,6 +29,7 @@ const sidebars = {
         "modules/emails",
         "modules/endpoints",
         "modules/files",
+        "modules/geoip",
         "modules/infrastructure",
         "modules/subdomains",
         "modules/technologies",
