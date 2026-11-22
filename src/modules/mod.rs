@@ -7,6 +7,7 @@ pub mod domain_takeover;
 pub mod emails;
 pub mod endpoints;
 pub mod files;
+pub mod geoip;
 pub mod infrastructure;
 pub mod ready;
 pub mod request;

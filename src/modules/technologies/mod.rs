@@ -60,17 +60,19 @@ impl Module for ModuleTechnologies {
             }
         }
 
-        if let Some(parent) = session
-            .get_database()
-            .search(Type::Domain, domain.to_string())
-        {
-            if let NodeMetadata::Domain(metadata) = &mut parent.metadata {
-                metadata.technologies = Some(technologies_found.clone());
+        if !technologies_found.is_empty() {
+            if let Some(parent) = session
+                .get_database()
+                .search(Type::Domain, domain.to_string())
+            {
+                if let NodeMetadata::Domain(metadata) = &mut parent.metadata {
+                    metadata.technologies = Some(technologies_found.clone());
+                }
+                logger::println(
+                    self.name(),
+                    format!("Technologies found: {}", technologies_found.join(", ")),
+                );
             }
-            logger::println(
-                self.name(),
-                format!("Technologies found: {}", technologies_found.join(", ")),
-            );
         }
 
         Ok(())

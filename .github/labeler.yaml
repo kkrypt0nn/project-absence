@@ -71,6 +71,11 @@ module/files:
       - any-glob-to-any-file:
           - src/modules/files/**/*
 
+module/geoip:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/geoip/**/*
+
 module/infrastructure:
   - changed-files:
       - any-glob-to-any-file:
