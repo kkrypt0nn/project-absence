@@ -205,7 +205,7 @@ pub struct TechnologiesConfig {
 pub struct TlsConfig {
     /// Whether the module is enabled
     pub enabled: bool,
-    /// Whether to connect and be able to check for invalid certificates
+    /// Whether to connect to domains with invalid certificates (expired, not trusted, etc.)
     pub danger_accept_invalid_certs: Option<bool>,
 }
 
