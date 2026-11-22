@@ -1,4 +1,12 @@
-/.git
-/.github
-/target
-/website
+.git/
+.github/
+.gitignore
+
+dist/
+target/
+website/
+
+Dockerfile
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+README.md
