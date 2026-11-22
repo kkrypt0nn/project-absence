@@ -19,10 +19,13 @@ mod session;
 mod state;
 
 fn main() {
-    LOGGER.lock().unwrap().println(format!(
+    LOGGER.lock().unwrap().print(format!(
         "Project Absence v{} $[fg:gray](built for {OS} on {ARCH})$[effect:reset]",
         env!("CARGO_PKG_VERSION")
     ));
+    helpers::version_info::check_version();
+
+    LOGGER.lock().unwrap().println("");
 
     let args = args::Args::parse();
     if args.version {
