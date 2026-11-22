@@ -267,6 +267,9 @@ impl Session {
 
                         self.register_module(modules::files::dork::Runner::new(cfg));
                     }
+                    "geoip" => {
+                        self.register_module(modules::geoip::ModuleGeoIp::default());
+                    }
                     "infrastructure" => {
                         self.register_module(
                             modules::infrastructure::ModuleInfrastructure::default(),
@@ -377,6 +380,12 @@ impl Session {
             if !runners.is_empty() {
                 self.register_module(modules::files::FileDiscoveryModule::new(runners));
             }
+        }
+
+        if let Some(geoip_cfg) = &self.config.geoip
+            && geoip_cfg.enabled
+        {
+            self.register_module(modules::geoip::ModuleGeoIp::default());
         }
 
         if let Some(infrastructure_cfg) = &self.config.infrastructure

@@ -2,9 +2,9 @@ use std::{collections::HashMap, fmt, sync::Arc};
 
 use crate::{
     config,
-    database::node::{Node, NodeMetadata, Type},
+    database::node::{Node, Type},
     event_bus::Event,
-    helpers, logger,
+    logger,
     modules::Module,
     session::Session,
 };
@@ -141,16 +141,7 @@ impl Module for Runner {
                     if let Some(parent) =
                         session.get_database().search(Type::Domain, domain.clone())
                     {
-                        let mut new_node = Node::new(Type::Domain, subdomain.to_string());
-                        if let Some(ip_addr) = helpers::network::get_ip_addr(&subdomain) {
-                            if let NodeMetadata::Domain(metadata) = &mut new_node.metadata {
-                                metadata.ip = Some(ip_addr.to_string());
-                                if let Some(geoinfo) = helpers::network::geolocate_ip(ip_addr) {
-                                    metadata.geoinfo = Some(geoinfo);
-                                }
-                            }
-                        }
-                        parent.connect(new_node);
+                        parent.connect(Node::new(Type::Domain, subdomain.to_string()));
                     }
                     session.publish(Event::DiscoveredDomain(subdomain.to_string()));
                 }

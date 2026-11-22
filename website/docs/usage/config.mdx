@@ -35,6 +35,9 @@ enabled_runners = ["dork"]
 search_engine = "brave"
 file_types = ["pdf", "txt"]
 
+[geoip]
+enabled = true
+
 [infrastructure]
 enabled = true
 
@@ -50,6 +53,10 @@ recent_only = false
 
 [technologies]
 enabled = true
+
+[tls]
+enabled = true
+danger_accept_invalid_certs = false
 ```
 
 Every module can be `enabled` by setting its value to `true` or have at least one runner listed in `enabled_runners` (if the module has runners). Some modules and runners have settings that can be set specifically for them only; see the page of the modules to know what can be set.

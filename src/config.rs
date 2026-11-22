@@ -36,6 +36,9 @@ enabled_runners = ["dork"]
 search_engine = "brave"
 file_types = ["pdf", "txt"]
 
+[geoip]
+enabled = true
+
 [infrastructure]
 enabled = true
 
@@ -88,6 +91,7 @@ pub struct Config {
     pub endpoints: Option<EndpointsConfig>,
     pub emails: Option<EmailsConfig>,
     pub files: Option<FilesConfig>,
+    pub geoip: Option<GeoIpConfig>,
     pub infrastructure: Option<InfrastructureConfig>,
     pub subdomains: Option<SubdomainsConfig>,
     pub technologies: Option<TechnologiesConfig>,
@@ -150,6 +154,12 @@ pub struct FilesDorkConfig {
     pub search_engine: Option<files::dork::SearchEngine>,
     /// The file types to search for
     pub file_types: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct GeoIpConfig {
+    /// Whether the module is enabled
+    pub enabled: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

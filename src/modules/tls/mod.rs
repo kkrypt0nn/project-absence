@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     database::node::{Node, NodeMetadata, Type},
     event_bus::Event,
-    flags, helpers, logger,
+    flags, logger,
     modules::Module,
     session::Session,
 };
@@ -111,18 +111,8 @@ impl Module for ModuleTls {
                 self.name(),
                 format!("Discovered '{san}' from TLS certificate SAN"),
             );
-
             if let Some(parent) = parent.as_mut() {
-                let mut new_node = Node::new(Type::Domain, san.clone());
-                if let Some(ip_addr) = helpers::network::get_ip_addr(&san) {
-                    if let NodeMetadata::Domain(metadata) = &mut new_node.metadata {
-                        metadata.ip = Some(ip_addr.to_string());
-                        if let Some(geoinfo) = helpers::network::geolocate_ip(ip_addr) {
-                            metadata.geoinfo = Some(geoinfo);
-                        }
-                    }
-                }
-                parent.connect(new_node);
+                parent.connect(Node::new(Type::Domain, san.clone()));
             }
 
             session.publish(Event::DiscoveredDomain(san));
