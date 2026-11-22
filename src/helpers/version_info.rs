@@ -14,7 +14,10 @@ pub fn check_version() {
         Ok(client) => client,
         Err(_) => return,
     };
-    let latest_raw = match client.get("http://localhost:3000/latest-version").send() {
+    let latest_raw = match client
+        .get("https://absence.krypton.ninja/latest-version")
+        .send()
+    {
         Ok(response) if response.status().is_success() => match response.text() {
             Ok(version) => version.trim().to_string(),
             Err(_) => return,
