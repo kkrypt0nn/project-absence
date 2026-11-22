@@ -41,6 +41,21 @@ impl Session {
         let domain_clone = args.clone().domain;
         let is_verbose = args.verbose;
         let is_debug = args.debug;
+        let mut client_builder = ClientBuilder::new().tls_info(true);
+
+        if config
+            .tls
+            .as_ref()
+            .is_some_and(|tls| tls.enabled && tls.danger_accept_invalid_certs == Some(true))
+        {
+            logger::warn(
+                "setup(tls)",
+                "TLS certificate validation is disabled. Invalid TLS certificates will be accepted which can expose connections to man-in-the-middle attacks.",
+            );
+
+            client_builder = client_builder.danger_accept_invalid_certs(true);
+        }
+
         Arc::new(Self {
             args,
             bus: EventBus::default(),
@@ -50,10 +65,7 @@ impl Session {
                 domain_clone,
             ))),
             state: state::State::new(is_verbose, is_debug),
-            http_client: ClientBuilder::new()
-                .tls_info(true)
-                .build()
-                .expect("Client::new()"),
+            http_client: client_builder.build().expect("Client::new()"),
             shutdown: Semaphore::new(0),
         })
     }
@@ -453,6 +465,9 @@ impl Session {
                 }
             });
         }
+
+        self.state
+            .try_discover_domain(self.get_args().domain.clone());
 
         self.publish(event_bus::Event::Ready);
         self.publish(event_bus::Event::DiscoveredDomain(

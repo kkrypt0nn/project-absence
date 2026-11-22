@@ -54,6 +54,7 @@ enabled = true
 
 [tls]
 enabled = true
+danger_accept_invalid_certs = false
 "#;
 
 pub fn create_file_if_not_existing() {
@@ -204,6 +205,8 @@ pub struct TechnologiesConfig {
 pub struct TlsConfig {
     /// Whether the module is enabled
     pub enabled: bool,
+    /// Whether to connect and be able to check for invalid certificates
+    pub danger_accept_invalid_certs: Option<bool>,
 }
 
 impl Config {
