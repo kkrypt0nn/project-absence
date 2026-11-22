@@ -52,6 +52,9 @@
 - name: "module/technologies"
   color: "#2996D4"
   description: "Changes to the technologies module"
+- name: "module/tls"
+  color: "#204E89"
+  description: "Changes to the TLS module"
 
 # Status
 - name: "status/done"

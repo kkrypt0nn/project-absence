@@ -90,3 +90,8 @@ module/technologies:
   - changed-files:
       - any-glob-to-any-file:
           - src/modules/technologies/**/*
+
+module/tls:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/modules/tls/**/*
